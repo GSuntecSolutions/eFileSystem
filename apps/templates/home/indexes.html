@@ -1,0 +1,987 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Dashboard {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{%block content%}
+
+
+    <div class="container">
+      <div class="row custom-full-width mb-4">
+        <div class="col-md-9 mt-5 mb-5, d-flex justify-content-between px-6">
+          <button id = "Upload" class="btn btn-primary align-items-center col-md-5">
+            Upload
+          </button>
+          <button id = "Create" class="btn btn-primary align-items-center col-md-5">
+            Create
+          </button>
+          {% comment %} <form class="search form-group" id="search-main" >
+            <label for="searchBar">Search User</label>
+            <div class="input-group input-group-merge search-bar">
+              <span class="input-group-text" id="topbar-addon">
+                <svg class="icon icon-xs" x-description="Heroicon name: solid/search" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                </svg>
+              </span>
+                <input type="text" class="form-control col-md-2" id="searchBar" placeholder="Search" aria-label="Search" aria-describedby="topbar-addon" name="searchDoc">
+            </div>
+
+          </form> {% endcomment %}
+        </div>
+      </div>
+      <div>
+      </div>
+    </div>
+    <div class="d-flex gap-3 justify-content-around text-nowrap col-md-12">
+      <iframe name="votar" style="display:none;"></iframe>
+      <div class = "col-md-8">
+        <div class = "row">
+          <div class="col-md-10 mt-4">
+            <div style = "display: none;" id="upload_file">
+            <!-- <div class="col-md-12"> -->
+              <div class="form-group flex-row d-flex flex-row align-items-center" >
+                <label for="image" style="margin-right: 1em">Upload File</label>
+                <input
+                  type="file"
+                  class="form-control col-md-6"
+                  id = "fileInput"
+                  accept=".docx, .pdf, .jpg, .jpeg, .png"
+                  onchange="extractMetadatas()"
+                />
+              </div>
+              <div class = 'd-flex flex-row col-md-12'>
+                <div class="d-flex mx-3 flex-row justify-center align-items-center">
+                  <div class="form-group col-md-6">
+                    <button id = "download"  class="btn btn-primary  mt-4 align-items-center" id="adhar"
+                      onclick="sendCustomData()"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-10" style = "display: none;" id = "use_template">
+            <div class = "d-flex flex-row align-items-center">
+              <div class="form-group" style = "margin-right: 1em;">
+                <label for="imagepan">Use Template</label>
+              </div>
+              <div class="col-md-10">
+                <select name="status" id="temple" class="form-control" onchange="handleSelectChange()">
+                  <option selected>----Select----</option>
+                  <option value="Customer Form">Customer Form</option>
+                  <option value="Fir Form">FIR Form</option>
+                  <option value="MSDA Form">MSDA Form</option>
+                </select>
+              </div>
+              <!-- Django template with Bootstrap for responsive button titles -->
+              {% comment %} <div class="flex-row custom-full-width">
+                <a href="{% url 'firform'%}" target="_blank" >
+                  <button type="submit" class="btn btn-primary btn-submit mb-4 ml-4 col-4" id="toggleFIR" onclick="gotoFir()">
+                      <div class="d-flex justify-content-center align-items-center flex-column">
+                        <span class="d-none d-lg-block">FIR Form</span>
+                        <span class="d-block d-lg-none">FIR Form</span>
+                      </div>
+                  </button>
+                </a>
+                <a href="{% url 'mahadiscomreg'%}" target="_blank" >
+                  <button type="submit" class="btn btn-primary btn-submit mb-4 ml-4 col-4" id="toggleMSDA" onclick="gotoFir()">
+                      <div class="d-flex justify-content-center align-items-center flex-column">
+                        <span class="d-none d-lg-block">MSDA Form</span>
+                        <span class="d-block d-lg-none">MSDA Form</span>
+                      </div>
+                  </button>
+                </a>
+              </div> {% endcomment %}
+            </div>
+          </div>
+        </div>
+        <div id = "toggleDiv" style = "display: none;">
+          
+          <h2 class="text-center mt-4">
+            Customer Information
+          </h2>
+          <div class="row col-md-12 mt-4 mb-5 d-flex">
+            <div class="card col-md-12">
+              <div class="col-md-12 d-flex flex-column align-items-end" id="userData">
+                <div class="col-md-7 text-center mt-3 d-flex flex-row  justify-content-between align-items-center px-4">
+                  {% comment %} <span class = "col-md-3"/> {% endcomment %}
+                </div>
+                <div class ='row justify-content-between aling-items-center col-md-12 px-1 mx-1'>
+                  <div class="col-md-4 gap-3 py-2 px-3">
+                    <label class="form-label text-nowrap" for="dob">Attach</label>
+                    <input
+                      type="file"
+                      class="form-control px-3"
+                      name="image"
+                      id="attach"
+                      placeholder="Image"
+                      accept=".docx, .pdf, .jpg, .jpeg, .png"
+                    />
+                  </div>
+                  <div class="col-md-4 gap-3 py-2 px-3">
+                    <label class="form-label text-nowrap" for="gender">Linked File</label>
+                    <input
+                      class="form-control"
+                      id="urlInput"
+                      type="text"
+                      name="linked"
+                      {% comment %} readonly  {% endcomment %}
+                      onblclick="showModal()" 
+                      placeholder="Input URL"
+                    />
+                    <div class="modal" id="urlModal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <input type="text" id="modalUrlInput" class="form-control" placeholder="Enter URL">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" onclick="cancelModal()">Cancel</button>
+                                    <button type="button" class="btn btn-primary" onclick="confirmModal()">OK</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4 gap-3 py-2 px-3">
+                    <label class="form-label text-nowrap" for="fatherName">Approved</label>
+                    <input
+                      class="form-control"
+                      id="approved"
+                      type="text"
+                      name="fatherName"
+                    />
+                  </div>
+                </div>
+                <div class ='row justify-content-between aling-items-center col-md-12 mt-4 px-1 mx-1'>
+                  <div class="col-md-6 gap-3 py-2 px-3">
+                    <label class="form-label text-nowrap" for="customerName">Customer Name</label>
+                    <input
+                      class="form-control"
+                      id="customerName"
+                      type="text"
+                      name="fatherName"
+                    />
+                  </div>
+                  <div class="col-md-6 gap-3 py-2 px-3">
+                    <label class="form-label text-nowrap" for="adharNo">Date of Birth</label>
+                    <input
+                      class="form-control"
+                      id="birth"
+                      type="date"
+                      name="adharNo"
+                    />
+                  </div>
+                </div>
+                <div class ='row justify-content-between aling-items-center col-md-12 mt-4 px-1 mx-1'>
+                  <div class="col-md-6 gap-3 py-2 px-3">
+                    <label class="form-label text-nowrap" for="panNo">PAN Number</label>
+                    <input
+                      class="form-control"
+                      id="panNumber"
+                      type="text"
+                      name="panNo"
+                    />
+                  </div>
+                  <div class="col-md-6 gap-3 py-2 px-3">
+                    <label class="form-label text-nowrap" for="adharNo">Adhar Number</label>
+                    <input
+                      class="form-control"
+                      id="adharNumber"
+                      type="text"
+                      name="adharNo"
+                    />
+                  </div>
+                </div>
+                <div class="col-md-12 gap-6 py-2 px-3">
+                  <label class="form-label text-nowrap" for="gender">Short Description</label>
+                  <textarea   cols="50" rows="2" id="shortDescription" class="form-control" style="font-size: 15px;">{{result}}</textarea>
+                </div>
+                <div class="col-md-12 gap-6 py-2 px-3">
+                  <label class="form-label text-nowrap" for="gender">Details</label>
+                  <textarea   cols="50" rows="10" id="detailsitem" class="form-control" style="font-size: 15px;">{{result}}</textarea>
+                </div>
+                <div class = 'd-flex flex-row col-md-12'>
+                  <div class="d-flex mx-3 gap-3 flex-row justify-center align-items-center">
+                    <form class="form-group col-md-6" onsubmit="submitForm(event)">
+                      <button id = "download"  class="btn btn-primary  mt-4  col-md-12 align-items-center" id="adhar"
+                        {% comment %} onclick="sendCustomData()" {% endcomment %}
+                      >
+                        Download
+                      </button>
+                    </form>
+                    <div class="form-group col-md-6">
+                      <a 
+                        type="button" 
+                        class="btn btn-primary btn-submit mt-4 col-md-12"
+                        id="reset"
+                        href="{% url 'home'%}"
+                      >
+                        Save as Draft
+                      </a>
+                    </div>
+                    <div class="form-group col-md-6">
+                      <button id = "download"  class="btn btn-primary  mt-4  col-md-12 align-items-center" id="adhar"
+                        onclick="sendCustomData()"
+                      >
+                        Submit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12 gap-6 py-2 px-3 flex-start">
+                  <label class="form-label text-nowrap" for="gender">Comment</label>
+                  <textarea   cols="50" rows="2" id="comment" class="form-control" style="font-size: 15px;">{{result}}</textarea>
+                </div>
+              </div>
+              <!-- </textarea> -->
+              <p id="userexists"></p>
+            </div>
+          </div>
+        </div>
+        <div id = "save_as_draft" style = "display: none;">
+
+        </div>
+        <div class="modal fade" id="modal-notification" tabindex="-1" role="dialog" aria-labelledby="modal-notification" aria-hidden="true">
+          <div class="modal-dialog modal-white modal-dialog-centered" role="document">
+              <div class="modal-content bg-gradient-white">
+                  <!-- <button type="button" class="btn-close  theme-settings-close fs-6 ms-auto" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                  <!-- <div class="modal-header">
+                      <p class="modal-title text-gray-200" id="modal-title-notification">A new experience, personalized for you.</p>
+                  </div> -->
+                  <div class="modal-body text-danger">
+                      <div class="py-3 text-center">
+                          <!-- <span class="modal-icon">
+                            <i class="fa fa-exclamation-circle" style="font-size:20px;color:red"></i>
+                            
+                            <svg class="icon icon-xl text-gray-200" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z"></path><path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"></path></svg> -->
+                          <!-- </span> --> 
+                          <h2 class="h2 modal-title my-2">User Exists</h2>
+                          <!-- <p>Do you know that you can assign status and relation to a company right in the visit list?</p> -->
+                      </div>
+                  </div>
+                  <!-- <div class="modal-footer"> -->
+                      <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Close</button>
+                  <!-- </div> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      <div class ="col-md-4, ml-3 px-3">
+        <label for="toggleProperties" id="toggleLabel">
+          <i id="icon" class="fa fa-chevron-left"></i>
+          Details
+        </label>
+        <div id="properties" style="display: none;" class = "mb-2">
+            <!-- Properties to show/hide -->
+            Status: 
+            <div class="col-md-12">
+              <select name="status" id="lang" class="form-control">
+                  <option value="Created" selected>Created</option>
+                  <option value="Assigned">Assigned</option>
+                  <option value="Work in Progress">Work in Progress</option>
+                  <option value="For Approval">For Approval</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Closed">Closed</option>
+              </select>
+            </div>
+            <br>
+            File Name: <input
+              class="form-control"
+              id="fileName"
+              type="text"
+              name="adharNo"
+            /><br>
+            File ID: <div id='fileId'>{{unique_id}}</div><br>
+            Assigned To: 
+            <div class="col-md-12">
+              <select name="status" id="assign" class="form-control">
+                <option value = 'root' selected>root</option>
+              </select>
+            </div>
+            <br>
+            Labels: <input
+              class="form-control"
+              id="labels"
+              type="text"
+              name="adharNo"
+            /><br>
+            Created Date: <div id='createDate'></div><br>
+            Created By: <div id="createdBy"></div><br>
+            Modified By:<div id="modifiedBy"></div><br>
+            Modified Date:<div id="modifiedDate"></div> <br>
+            Priority: 
+            <div class="col-md-12">
+              <select name="status" id="priority" class="form-control">
+                <option value="High" selected>High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div><br>
+            System: 
+            <select name="status" id="system" class="form-control">
+              <option value="System A" selected>System A</option>
+              <option value="System B">System B</option>
+              <option value="System C">System C</option>
+              <option value="System D">System D</option>
+            </select><br>
+            Approved By:<div id="approvedBy">root</div> <br>
+            Approved Date: <div id="currentTime"></div><br>
+            Target Date: 
+            <input
+              class="form-control"
+              id="target_date"
+              type="date"
+              name="adharNo"
+            />
+            <br>
+        </div>
+      </div>
+    </div>
+
+  </div>
+ <!-- <script src="https://code.jquery.com/jquery-3.5.1.js"  -->
+ <!--          integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="  -->
+ <!--            crossorigin="anonymous"></script> -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<!-- url input-->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+      function showModal() {
+          document.getElementById('urlModal').style.display = 'block';
+      }
+
+      function cancelModal() {
+          document.getElementById('urlModal').style.display = 'none';
+      }
+
+      function confirmModal() {
+          var modalUrlInput = document.getElementById('modalUrlInput');
+          var urlInput = document.getElementById('urlInput');
+          urlInput.value = modalUrlInput.value;
+          cancelModal();
+      }
+  </script>
+  
+  <script>
+    function submitForm(event) {
+      event.preventDefault();
+      var attach = document.getElementById('attach').value;
+      var linkfile = document.getElementById('urlInput').value;
+      var approved = document.getElementById('approved').value;
+      var customerName = document.getElementById('customerName').value;
+      var birth = document.getElementById('birth').value;
+      var panNumber = document.getElementById('panNumber').value;
+      var adharNumber = document.getElementById('adharNumber').value;
+      var shortDescription = document.getElementById('shortDescription').value;
+      var detailsitem = document.getElementById('detailsitem').value;
+      var url = "{% url 'download_pdf' %}?attach=" + attach + "&linkfile=" + linkfile + "&approved=" + approved + "&birth=" + birth + "&panNumber=" + panNumber + "&adharNumber=" + adharNumber + "&shortDescription=" + shortDescription + "&detailsitem=" + detailsitem ;
+      window.location.href = url;
+      console.log('shortDescription', shortDescription, 'detailsitem', detailsitem);
+    }
+  </script>
+
+  <script>
+    let cnt =0;
+    function handleSelectChange() {
+      var selectedOption = document.getElementById("temple").value;
+      if (selectedOption === "Customer Form") {
+        console.log('selectedOption', selectedOption)
+        cnt = cnt + 1;
+        let cntt= cnt % 2;
+        if (cntt == 0){
+          document.getElementById('createDate').innerText = '';
+          document.getElementById('createdBy').innerText = '';
+          document.getElementById('modifiedDate').innerText = '';
+          document.getElementById('modifiedBy').innerText = '';
+          document.getElementById("fileId").innerText = '';
+          
+        }
+        else {
+          $.ajax({
+              url: 'unique_id',
+              type: 'GET',
+              success: function(data) {
+                document.getElementById("fileId").innerText = data;
+                  // Update the frontend content with the unique ID as needed
+              }
+          });
+          function getCurrentDate() {
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = currentDate.getMonth() + 1; // Month is zero-based
+            var day = currentDate.getDate();
+            
+            var metadata = {
+                year: year,
+                month: month,
+                day: day
+            };
+            
+            displayMetadata(metadata);
+          }
+          function displayMetadata(metadata) {
+            var metadataDisplay = document.getElementById('createDate');
+            var metadataModify = document.getElementById('modifiedDate');
+            metadataDisplay.innerHTML = metadata.month + '/' + metadata.day + '/' + metadata.year;
+            metadataModify.innerHTML = metadata.month + '/' + metadata.day + '/' + metadata.year;
+            document.getElementById('createdBy').innerText = 'root';
+            document.getElementById('modifiedBy').innerText = 'root';
+          }
+  
+          // Call the function to get the current date
+          getCurrentDate();
+        }
+        var textElement = document.getElementById("toggleDiv");
+        textElement.style.display = "block";
+      }
+      else if (selectedOption === "Fir Form") {
+        window.location.href = 'firform';
+      }
+      else if (selectedOption === "MSDA Form") {
+        window.location.href = 'mahadiscomreg'
+      }
+        // You can perform additional actions based on the selected option here
+    }
+  </script>
+  <Script>
+    {% comment %} var unique_id = shortuuid.ShortUUID().random(length=8)
+    var paragraph = document.getElementById("uniqueid");
+
+// Update the text content of the <p> element
+    paragraph.textContent = unique_id; {% endcomment %}
+    
+    function sendCustomData() {
+      var text = document.getElementById('lang').value;
+      var fileId = document.getElementById('fileId').innerHTML;
+      var createDate = document.getElementById('createDate').innerHTML;
+      var modifiedDate = document.getElementById('modifiedDate').innerHTML;
+      var modifiedBy = document.getElementById('modifiedBy').innerHTML;
+      var approvedBy = document.getElementById('approvedBy').innerHTML;
+      var currentTime = document.getElementById('currentTime').innerHTML;
+      var priority = document.getElementById('priority').value;
+      var system = document.getElementById('system').value;
+      var fileName = document.getElementById('fileName').value;
+      var assign = document.getElementById('assign').value;
+      var labels = document.getElementById('labels').value;
+      var createBy = document.getElementById('createdBy').innerHTML;
+      var targetDate = document.getElementById('target_date').value;
+      var attach = document.getElementById('attach').value;
+      var linkfile = document.getElementById('urlInput').value;
+      var approved = document.getElementById('approved').value;
+      var customerName = document.getElementById('customerName').value;
+      var birth = document.getElementById('birth').value;
+      var panNumber = document.getElementById('panNumber').value;
+      var adharNumber = document.getElementById('adharNumber').value;
+      var shortDescription = document.getElementById('shortDescription').value;
+      var detailsitem = document.getElementById('detailsitem').value;
+      var comment = document.getElementById('comment').value;
+      console.log(text, fileName, fileId, createDate, createdBy, modifiedDate, modifiedBy, approvedBy, currentTime,
+        fileName, assign, labels, priority, system, targetDate
+      );
+      fetch('send_custom_data', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({ status: text, 
+            file_name: fileName, 
+            file_id: fileId,  
+            assigned: assign,
+            labeled: labels,
+            create_date: createDate,
+            create_by: createBy,
+            modified_date: modifiedDate,
+            modified_by: modifiedBy,
+            priorityed: priority,
+            systemed: system,
+            approved_by:approvedBy,
+            current_time: currentTime,
+            target_date: targetDate,
+            editableData: {
+              attached : attach,
+              link_file: linkfile,
+              approve : approved,
+              customer_name : customerName,
+              birthday: birth,
+              panNo: panNumber,
+              adharNo: adharNumber,
+              shortDesp: shortDescription,
+              details_item: detailsitem,
+              comments: comment,
+            }
+          })
+      })
+      .then(response => response.text())
+      .then(data => {
+          console.log(success)
+          var unique_id = shortuuid.ShortUUID().random(length=8)
+          var paragraph = document.getElementById("uniqueid");
+      })
+      .catch(error => {
+          console.error('Error:', error);
+      });
+    }
+    {% comment %} let cnt =0;
+    function generate_id() {
+      cnt = cnt + 1;
+      let cntt= cnt % 2;
+      if (cntt == 0){
+        document.getElementById('createDate').innerText = '';
+        document.getElementById('createdBy').innerText = '';
+        document.getElementById('modifiedDate').innerText = '';
+        document.getElementById('modifiedBy').innerText = '';
+        document.getElementById("fileId").innerText = '';
+        
+      }
+      else {
+        $.ajax({
+            url: 'unique_id',
+            type: 'GET',
+            success: function(data) {
+              document.getElementById("fileId").innerText = data;
+                // Update the frontend content with the unique ID as needed
+            }
+        });
+        function getCurrentDate() {
+          var currentDate = new Date();
+          var year = currentDate.getFullYear();
+          var month = currentDate.getMonth() + 1; // Month is zero-based
+          var day = currentDate.getDate();
+          
+          var metadata = {
+              year: year,
+              month: month,
+              day: day
+          };
+          
+          displayMetadata(metadata);
+        }
+        function displayMetadata(metadata) {
+          var metadataDisplay = document.getElementById('createDate');
+          var metadataModify = document.getElementById('modifiedDate');
+          metadataDisplay.innerHTML = metadata.month + '/' + metadata.day + '/' + metadata.year;
+          metadataModify.innerHTML = metadata.month + '/' + metadata.day + '/' + metadata.year;
+          document.getElementById('createdBy').innerText = 'root';
+          document.getElementById('modifiedBy').innerText = 'root';
+        }
+
+        // Call the function to get the current date
+        getCurrentDate();
+        document.getElementById("togglePan").addEventListener("click", function() {
+          var textElement = document.getElementById("toggleDiv");
+          if (textElement.style.display === "none") {
+              textElement.style.display = "block";
+          } else {
+              textElement.style.display = "none";
+          }
+        });
+      }
+    } {% endcomment %}
+  </Script>
+  <script>
+    function getCurrentDate() {
+        var currentDate = new Date();
+        var year = currentDate.getFullYear();
+        var month = currentDate.getMonth() + 1; // Month is zero-based
+        var day = currentDate.getDate();
+        
+        var metadata = {
+            year: year,
+            month: month,
+            day: day
+        };
+        
+        displayMetadata(metadata);
+    }
+
+    function displayMetadata(metadata) {
+        var metadataDisplay = document.getElementById('currentTime');
+        metadataDisplay.innerHTML = metadata.month + '/' + metadata.day + '/' + metadata.year;
+    }
+  
+
+    // Call the function to get the current date
+    getCurrentDate();
+  </script>
+  <script>
+    document.getElementById("togglePan").addEventListener("click", function() {
+        var textElement = document.getElementById("toggleDiv");
+        if (textElement.style.display === "none") {
+            textElement.style.display = "block";
+        } else {
+            textElement.style.display = "none";
+        }
+    });
+  </script>
+  <script>
+    document.getElementById("Upload").addEventListener("click", function() {
+      var uploadElement = document.getElementById("upload_file");
+      var templateElement = document.getElementById("use_template");
+      uploadElement.style.display = "block";
+      templateElement.style.display = "none";
+    });
+  </script>
+  <script>
+    document.getElementById("Create").addEventListener("click", function() {
+      var uploadElement = document.getElementById("upload_file");
+      var templateElement = document.getElementById("use_template");
+      uploadElement.style.display = "none";
+      templateElement.style.display = "block";
+    });
+  </script>
+  <script>
+    $(document).ready(function() {
+        $("#toggleLabel").click(function() {
+            $("#properties").toggle();
+            $("#icon").toggleClass("fa-chevron-down fa-chevron-left");
+        });
+    });
+  </script>
+  <script>
+    function gotoFir() {  
+      $.ajax({
+          url: 'unique_id',
+          type: 'GET',
+          success: function(data) {
+            document.getElementById("fileId").innerText = data;
+              // Update the frontend content with the unique ID as needed
+          }
+      });
+      function getCurrentDate() {
+        var currentDate = new Date();
+        var year = currentDate.getFullYear();
+        var month = currentDate.getMonth() + 1; // Month is zero-based
+        var day = currentDate.getDate();
+        
+        var metadata = {
+            year: year,
+            month: month,
+            day: day
+        };
+        
+          displayMetadata(metadata);
+      }
+
+      function displayMetadata(metadata) {
+          var metadataDisplay = document.getElementById('createDate');
+          metadataDisplay.innerHTML = metadata.month + '/' + metadata.day + '/' + metadata.year;
+          document.getElementById('createdBy').innerText = 'root';
+      }
+      getCurrentDate();
+    }
+  </script>
+  <script>
+    $(document).ready(function() {
+      $('#fileInput').on('change', function() {
+          var file = this.files[0];
+          var formData = new FormData();
+          formData.append('file', file);
+  
+          $.ajax({
+              url: 'extract_metadata',
+              type: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': '{{ csrf_token }}'
+              },
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function(data) {
+                  $('#createdDate').text(data.created_date);
+                  $('#createBy').text(data.author);
+              },
+              error: function() {
+                  alert('Error occurred while processing the file.');
+              }
+          });
+      });
+  });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+  <script>
+    function extractMetadatas() {
+        var fileInput = document.getElementById('fileInput');
+        var file = fileInput.files[0];
+        console.log('file', file)
+        if (file) {
+          EXIF.getData(file, function() {
+              var metadata = EXIF.getAllTags(this);
+              displayMetadata(metadata);
+              console.log('metadata', metadata);
+          });
+        }
+    }
+  </script>
+  <script>
+    function extractMetadata() {
+        var fileInput = document.getElementById('fileInput');
+        var file = fileInput.files[0];
+        var fileType = file.type;
+        console.log('type================>',fileType)
+
+        if (fileType === 'application/pdf') {
+          console.log('pdf')
+            // Extract metadata from PDF file
+            pdfjsLib.getDocument(file).promise.then(function(pdf) {
+                pdf.getMetadata().then(function(metadata) {
+                  
+                    console.log('pdf--------------->', metadata)
+                    displayMetadata(metadata);
+                });
+            });
+        } else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || fileType === 'application/msword') {
+            console.log('doc');
+            // Extract metadata from DOC file (assuming you have the necessary library)
+            mammoth.extractRawText({ arrayBuffer: file }).then(function(result) {
+                var metadata = {
+                    createdDate: result.value.createdDate,
+                    author: result.value.author
+                };
+                console.log('doc--------------->', metadata)
+                displayMetadata(metadata);
+            });
+        } else if (fileType === 'image/jpeg' || fileType === 'image/png') {
+            // Extract metadata from image file
+            console.log('img')
+            EXIF.getData(file, function() {
+                var metadata = {
+                    createdDate: this.exifdata.DateTimeOriginal,
+                    author: this.exifdata.Artist
+                };
+                console.log('img--------------->', metadata)
+                displayMetadata(metadata);
+            });
+        } else {
+          
+            function getCurrentDate() {
+              var currentDate = new Date();
+              var year = currentDate.getFullYear();
+              var month = currentDate.getMonth() + 1; // Month is zero-based
+              var day = currentDate.getDate();
+              
+              var metadata = {
+                  year: year,
+                  month: month,
+                  day: day
+              };
+              
+              displayMetadata(metadata);
+          }
+
+          function displayMetadata(metadata) {
+              var metadataDisplay = document.getElementById('createDate');
+              metadataDisplay.innerHTML = metadata.month + '/' + metadata.day + '/' + metadata.year;
+              document.getElementById('createdBy').innerText = 'root';
+          }
+        }
+    }
+
+    function displayMetadata(metadata) {
+      console.log(metadata)
+      document.getElementById('createDate').innerText = metadata.createdDate;
+      document.getElementById('createdBy').innerText = metadata.author;
+    }
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+/>
+
+
+    {%endblock %}
+        
+
+    {% include 'includes/scripts.html' %}
+
+
+    var attach;
+    var linkfile;
+    var approved;
+    var customerName;
+    var birth;
+    var panNumber;
+    var adharNumber;
+    var shortDescription;
+    var detailsitem;
+    var text;
+    var createDate;
+    var modifiedDate;
+    var modifiedBy;
+    var approvedBy;
+    var currentTime;
+    var priority;
+    var system;
+    var fileName;
+    var assign;
+    var labels;
+    var createBy;
+    var targetDate;
+    var comment;
+    var selectedOption;
+          // Function to save state data to session storage
+          function saveState() {
+            console.log('save');
+            attach = document.getElementById('attach').value;
+            linkfile = document.getElementById('urlInput').value;
+            approved = document.getElementById('approved').value;
+            customerName = document.getElementById('customerName').value;
+            birth = document.getElementById('birth').value;
+            panNumber = document.getElementById('panNumber').value;
+            adharNumber = document.getElementById('adharNumber').value;
+            shortDescription = document.getElementById('shortDescription').value;
+            detailsitem = document.getElementById('detailsitem').value;
+            text = document.getElementById('lang').value;
+            fileId = document.getElementById('fileId').innerHTML;
+            createDate = document.getElementById('createDate').innerHTML;
+            modifiedDate = document.getElementById('modifiedDate').innerHTML;
+            modifiedBy = document.getElementById('modifiedBy').innerHTML;
+            approvedBy = document.getElementById('approvedBy').innerHTML;
+            currentTime = document.getElementById('currentTime').innerHTML;
+            priority = document.getElementById('priority').value;
+            system = document.getElementById('system').value;
+            fileName = document.getElementById('fileName').value;
+            assign = document.getElementById('assign').value;
+            labels = document.getElementById('labels').value;
+            createBy = document.getElementById('createdBy').innerHTML;
+            targetDate = document.getElementById('target_date').value;
+            comment = document.getElementById('comment').value;
+            selectedOption = document.getElementById("temple").value;
+        
+            sessionStorage.setItem('page1State', JSON.stringify({ 
+                button_select: button_select, 
+                attach: attach, 
+                linkfile: linkfile, 
+                approved: approved, 
+                customerName: customerName,
+                birth: birth,
+                panNumber: panNumber,
+                adharNumber: adharNumber,
+                shortDescription: shortDescription,
+                detailsitem: detailsitem,
+                text: text,
+                fileId: fileId,
+                createDate: createDate,
+                modifiedDate: modifiedDate,
+                modifiedBy: modifiedBy,
+                approvedBy: approvedBy,
+                currentTime: currentTime,
+                priority: priority,
+                system: system,
+                fileName: fileName,
+                assign: assign,
+                labels: labels,
+                createBy: createBy,
+                targetDate: targetDate,
+                comment: comment,
+                selectedOption: selectedOption,
+            }));
+        
+            console.log('State saved!');
+        }
+        
+        window.addEventListener('beforeunload', function (e) {
+            saveState();
+        });
+        
+    // Check if there is stored state data when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM content loaded');
+      var storedState = sessionStorage.getItem('page1State');
+      console.log('storedState', storedState);
+      if (storedState) {
+          var stateData = JSON.parse(storedState);
+          button_select = stateData.button_select;
+          //document.getElementById('selectedOption').value = stateData.selectedOption;
+          console.log('btn', button_select, stateData);
+      }
+      sel_btn();
+      
+    });
+    document.getElementById("Upload").addEventListener("click", function() {
+      button_select = "Upload";
+      sel_btn();
+      console.log(button_select);
+    });
+    document.getElementById("Create").addEventListener("click", function() {
+      button_select = "Create";
+      sel_btn();
+      console.log(button_select);
+    });
+    function sel_btn () {
+      if (button_select === "Upload") {
+        uploadElement.style.display = "block";
+        templateElement.style.display = "none";
+      }
+      else if (button_select === "Create") {
+        uploadElement.style.display = "none";
+        templateElement.style.display = "block";
+      }
+      else {
+        uploadElement.style.display = "none";
+        templateElement.style.display = "none";
+      }
+    }
+    function sel_option(){
+      document
+    }
+
+    
+    dist: dist,
+    ps: ps,
+    year: year,
+    firNo:firNo,
+    firDate: firDate,
+    act1: act1,
+    sections1: sections1,
+    act4: act4,
+    day: day,
+    dateFrom: dateFrom,
+    dateTo: dateTo,
+    timePeriod: timePeriod,
+    timeFrom: timeFrom,
+    timeTo: timeTo,
+    recvDate: recvDate,
+    recvTime: recvTime,
+    refNo: refNo,
+    refTime: refTime,
+    infoType: infoType,
+    writtenOral: writtenOral,
+    direction: direction,
+    beatNo: beatNo,
+    address: address,
+
+    
+    consumerType: consumerType,
+    consumerNo: consumerNo,
+    bu: bu,
+    actType1: actType1,
+    actType2: actType2,
+    firstName: firstName,
+    middleName: middleName,
+    lastName: lastName,
+    uid: uid,
+    gender: gender,
+    maritalStatus: maritalStatus, 
+    dob: dob,
+    securityQuestion: securityQuestion,
+    securityAnswer: securityAnswer,
+    address1: address1,
+    address2: address2,
+    city: city,
+    state: state,
+    country: country,
+    pincode: pincode

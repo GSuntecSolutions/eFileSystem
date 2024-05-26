@@ -1,0 +1,304 @@
+{%extends 'layouts/base.html'%}
+
+{%block content%}
+{% load crispy_forms_tags %}  
+
+<div style=" margin-top: 100px;" >
+  <div class="card mx-auto col-md-12">
+    <div class="card-header">
+      <div class="d-flex justify-content-center text-center">
+        <h2  style="padding-top: 25px;" >User List</h2>
+        <!-- <button class="btn btn-secondary col-md-2 mt-3 mb-3 mx-3">Create User</button> -->
+      </div>
+    </div>
+    <div class="card-body ">
+      <!-- <div class="text-center"> -->
+      <div style="overflow-x:auto;">
+        <table class="table table-hover table-responsive table-striped table-bordered">
+          <thead class="table-dark col-md-10">
+            <tr>
+              <th hidden>id</th>
+              <th class = "text-center">User Name</th>
+              <th class = "text-center">First Name</th>
+              <th class = "text-center">Last Name</th>
+              <th class = "text-center">Email</th>
+              <th class = "text-center">Super User</th>
+              <th class = "text-center">Action</th>
+            </tr> 
+          </thead>
+          {%for user_member in users%}
+            <tr>
+              <td hidden>{{user_member.id}}</td>
+              <td class = "text-center">{{user_member.username}}</td>
+              <td class = "text-center">{{user_member.first_name}}</td>
+              <td class = "text-center">{{user_member.last_name}}</td>
+              <td class = "text-center">{{user_member.email}}</td>
+              <td class = "text-center">{% if user_member.is_superuser%}Yes{%else%}No{%endif%}</td>
+              <td class = "d-flex, justify-content-between text-center"> <img src="/static/assets/img/edit.svg" alt="Pen Image" id = "edit" name="{{user_member.id}}" style = "width: 1.5em; height: 1.5em; margin-right: 1.5em;" onclick="editRow(this)"> 
+                <img src="/static/assets/img/del.svg" alt="Pen Image" id = "delete" name = "{{user_member.id}}" style = "width: 1.5em; height: 1.5em;"> 
+              </td>
+            </tr>
+            
+            {%endfor%}
+        </table>
+      </div>
+    </div>
+    <div class = "col-md-12 d-flex justify-content-end">
+      <button class="btn  btn-primary m-3 col-md-2 justify-content-end" data-bs-target="#exampleModal" data-bs-toggle="modal" style="border-radius: 5px; border-color: transparent; margin-right: 3em; background-color: #00B3F2;">Create User</button>
+    </div>
+  </div>
+</div>
+  
+  <!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this user?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">Edit User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% comment %} <input type="hidden" id="userId"> {% endcomment %}
+        <label for="editUsername">Username:</label>
+        <input type="text" id="editUsername" class="form-control">
+        <label for="editFirstName">First Name:</label>
+        <input type="text" id="editFirstName" class="form-control">
+        <label for="editLastName">Last Name:</label>
+        <input type="text" id="editLastName" class="form-control">
+        <label for="editEmail">Email:</label>
+        <input type="email" id="editEmail" class="form-control">
+        <div class="form-check">
+          <input type="checkbox" id="editSuperuser" class="form-check-input" onchange="updateValue(this)">
+          <label class="form-check-label" for="editSuperuser">Super User</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="editconfirm">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal  fade " id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Create User</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p >
+          <ul id="message"></ul>
+        </p>
+        <form  method="POST" id="createuserform">
+          {%csrf_token%}
+          <input type ="text" name="user_id" value="{{ user.id }}" hidden>
+          {{form|crispy}}
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" form="createuserform" class="btn btn-primary">Register</button>
+      </div>
+    </div>
+  </div>
+</div> 
+
+{%endblock%}
+{%block javascripts%}
+<script src="https://code.jquery.com/jquery-3.5.1.js" 
+  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
+  crossorigin="anonymous"
+>
+</script>
+<script>
+  $(document).ready(function () {
+    console.log("document.ready")
+    $("#createuserform").submit(function (e) {
+      e.preventDefault();
+      console.log("started user creation");
+      var formData = new FormData(this);
+      // disable submit button
+      $.ajax({
+        url: "{% url 'create_user' %}",
+        type: "POST",
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function (data) {
+          console.log(data.result)
+          if (data.result === "success"){
+      $("#exampleModal").hide()
+          location.reload(true);
+          }
+          if (data.result === "error"){
+            var paragraph = document.getElementById("message");
+          for (const key in data.message){
+            console.log(`${data.message[key]}`);
+            paragraph.innerHTML += "<li class='text-danger'>" + `${data.message[key]}` +"</li>";
+          }
+          } 
+          return false;
+        },
+          error: function (data) {
+        },
+      });
+    });
+    $("#edituserform").submit(function (e) {
+      e.preventDefault();
+      var formData = new FormData(this);
+      $.ajax({
+          url: "{% url 'edit_user' %}",
+          type: "POST",
+          data: formData,
+          cache: false,
+          contentType: false,
+          processData: false,
+          success: function (data) {
+              console.log(data.result);
+              if (data.result === "success") {
+                  $("#exampleModal").hide();
+                  location.reload(true);
+              }
+          },
+          error: function (data) {
+              console.log("Error:", data);
+          }
+      });
+    });
+  });
+  document.querySelectorAll('#delete').forEach(item => {
+    item.addEventListener('click', event => {
+      const userId = item.getAttribute('name');
+      
+      // Show confirmation modal
+      $('#confirmationModal').modal('show');
+      
+      document.getElementById('confirmDelete').addEventListener('click', () => {
+        item.closest('tr').remove();
+        fetch('delete_user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({ user_id: userId })
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('User deleted successfully');
+          } else {
+            console.error('Failed to delete user');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+        
+        $('#confirmationModal').modal('hide');
+      });
+    });
+  });
+  
+  document.querySelectorAll('#edit').forEach(item => {
+    item.addEventListener('click', event => {
+      const userId = item.getAttribute('name');
+      // Show confirmation modal
+      $('#editModal').modal('show');
+      
+      document.getElementById('editconfirm').addEventListener('click', () => {
+      
+        const username = document.getElementById('editUsername').value;
+        const first_name = document.getElementById('editFirstName').value;
+        const last_name = document.getElementById('editLastName').value;
+        const email = document.getElementById('editEmail').value;
+        let is_superuser =0;
+        let is_staff =0 ;
+        function updateValue(checkbox) {
+          if (checkbox.id === 'editSuperuser') {
+            console.log('checkbox------>', checkbox.id, checkbox.checked)
+            is_superuser = checkbox.checked ? 1 : 0;
+            console.log('super', is_superuser)
+          }
+        }
+        updateValue(document.getElementById('editSuperuser'));
+        fetch('update_user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({ user_id: userId, 
+            username:username, 
+            first_name: first_name, 
+            last_name: last_name, 
+            email: email,
+            is_superuser: is_superuser,
+            is_staff: 1
+          })
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('User Edit successfully');
+            location.reload(true);
+          } else {
+            console.error('Failed to edit user');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+        
+        $('#editModal').modal('hide');
+      });
+    });
+  });
+  
+  function editRow(icon) {
+    var row = icon.closest('tr');
+    var userName = row.cells[1].textContent;
+    var firstName = row.cells[2].textContent;
+    var lastName = row.cells[3].textContent;
+    var email = row.cells[4].textContent;
+    var isSuperUser = row.cells[5].textContent;
+
+    
+    document.getElementById('editUsername').value = userName;
+    document.getElementById('editFirstName').value = firstName;
+    document.getElementById('editLastName').value = lastName;
+    document.getElementById('editEmail').value = email;
+    
+    if (isSuperUser == "Yes") {
+      document.getElementById('editSuperuser').checked = true;
+    }
+    else document.getElementById('editSuperuser').checked = false;
+    // Use the retrieved data as needed, for example, you can display it in a modal for editing
+    console.log("User Name: " + userName);
+    console.log("First Name: " + firstName);
+    console.log("Last Name: " + lastName);
+    console.log("Email: " + email);
+    console.log("Super User: " + isSuperUser);
+    // You can now perform further actions such as displaying this data in a form for editing
+}
+</script>
+{%endblock javascripts%}

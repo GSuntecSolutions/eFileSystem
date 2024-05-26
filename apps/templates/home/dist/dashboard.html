@@ -1,0 +1,426 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} UI Notifications {% endblock %} 
+
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="mt-5 mb-3 px-5">
+  <div class = "col-md-12 row align-items-center">
+    <!-- Calendar Filter -->
+      <div class ="col-md-6">
+          <label class="form-label" for="name">Calendar</label>
+          <div class ="d-flex flex-row align-items-center col-md-12">
+            <div class = 'd-flex flex-row align-items-center col-md-6'>
+                From:
+                <input
+                    class="form-control"
+                    style="margin-left: 1em;"
+                    id="from_date"
+                    type="date"
+                    name="adharNo"
+                />
+            </div>
+            <div class = 'd-flex flex-row align-items-center col-md-6' style ="margin-left: 1em">
+                To:
+                <input
+                    class="form-control"
+                    style="margin-left: 1em;"
+                    id="to_date"
+                    type="date"
+                    name="adharNo"
+                />
+            </div>
+          </div>
+      </div>
+      <!-- User Name -->
+      <div class="search form-group col-md-3 " id="search-main"  method="post" enctype="multipart/form-data">
+        <label for="searchBar">User</label>
+        <div class="input-group input-group-merge search-bar">
+            <input type="text" class="form-control col-md-2" id="user" placeholder="Search" aria-label="Search" aria-describedby="topbar-addon" name="searchDoc">
+        </div>
+      </div>
+      <!-- File status -->
+      <div class="search form-group col-md-3" id="search-main"  method="post" enctype="multipart/form-data">
+        {%csrf_token%}
+        <label for="searchBar">File Status</label>
+        <div class="input-group input-group-merge search-bar">
+            <input type="text" class="form-control col-md-2" id="fileid" placeholder="Search" aria-label="Search" aria-describedby="topbar-addon" name="searchDoc">
+        </div>
+    </div>
+  </div>
+  <!-- Chart Part -->
+  <div class="container justify-content-center">
+    <div class="row">
+      <div class="col-md-5">
+          <canvas id="myPieChart" width="100%" height="300"></canvas>
+      </div>
+      <div class="col-md-5" style="margin-left: 3em;">
+          <canvas id="myStackedBarChart" width="100%" height="100%"></canvas>
+      </div>
+    </div>
+    <div class="row mt-6">
+      <div class="col-md-5">
+          <canvas id="myIdbarChart" width="100%" height="100%"></canvas>
+      </div>
+      <div class="col-md-5" style="margin-left: 3em;">
+          <canvas id="myFileChart" width="100%" height="100%"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chartjs-3d-pie-chart"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+<script>
+    // Import DB data
+    var mongoData = JSON.parse('{{ json_data|escapejs }}');
+
+    var myChart = null; // Variable to store the Chart.js instance
+    var myStackedBarChart = null;
+    var myStackedBarChart2 = null;
+    var myFileChart = null;
+
+    // Filter Date
+    const defaultFromDate = new Date('1000-01-01');
+    const defaultToDate = new Date('3000-12-31');
+
+    const fromInput = document.getElementById('from_date');
+    const toInput = document.getElementById('to_date');
+    fromInput.addEventListener('input', filterData);
+    toInput.addEventListener('input', filterData);
+    document.addEventListener('DOMContentLoaded', function() {
+      filterData();
+    });
+    async function filterData() {
+        const fromDateValue = fromInput.value;
+        const toDateValue = toInput.value;
+      
+        const fromDate = fromDateValue ? new Date(fromDateValue) : defaultFromDate;
+        fromDate.setHours(0, 0, 0, 0); // Set time to midnight
+        const toDate = toDateValue ? new Date(toDateValue) : defaultToDate;
+        toDate.setHours(23, 59, 59, 999); // Set time to end of day
+      
+        kmsdataDate = mongoData.filter(item => {
+          const itemDate = new Date(item.modifiedDate);
+          itemDate.setHours(1, 0, 0, 0);
+          const fromDateObj = new Date(fromDate);
+          const toDateObj = new Date(toDate);
+          return itemDate >= fromDateObj && itemDate <= toDateObj;
+        });
+      
+        applyFilters();
+    }
+
+    // Filter User Name and File Status
+    function applyFilters() {
+        const searchTermStatus = document.getElementById('user').value.toLowerCase();
+        const searchTermId = document.getElementById('fileid').value.toLowerCase();
+      
+        const kmsdatafil = kmsdataDate.filter(item => {
+          return item.assign.toLowerCase().includes(searchTermStatus) && item.status.toLowerCase().includes(searchTermId);
+        });
+      
+        handleInputChange(kmsdatafil);
+        //location.reload();
+    }
+    document.getElementById('user').addEventListener('input', applyFilters);
+    document.getElementById('fileid').addEventListener('input', applyFilters);
+
+    // Pie Chart
+    function handleInputChange (mongodData) {
+        var created = 0;
+        var assigned = 0;
+        var work_in_progress = 0;
+        var for_approval = 0;
+        var approved = 0;
+        var completed = 0;
+        var close = 0;
+        mongodData.forEach(function(item) {
+            if (item.status === 'Created') {
+                created++;
+            }
+            if (item.status === 'Assigned') {
+                assigned++;
+            }
+            if (item.status === 'Work in Progress') {
+                work_in_progress++;
+            }
+            if (item.status === 'For Approval') {
+                for_approval++;
+            }
+            if (item.status === 'Approved') {
+                approved++;
+            }
+            if (item.status === 'Completed') {
+                completed++;
+            }
+            if (item.status === 'Closed') {
+            close++;
+            }
+        });
+        if (myChart) {
+            myChart.destroy();
+        }
+        if (myStackedBarChart) {
+            myStackedBarChart.destroy();
+        }
+        if (myStackedBarChart2) {
+            myStackedBarChart2.destroy();
+        }
+        if (myFileChart) {
+            myFileChart.destroy();
+        }
+        var ctx = document.getElementById('myPieChart').getContext('2d');
+        myChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Created', 'Assigned', 'Work in Progress', 'For Approval', 'Approved', 'Completed', 'Closed'],
+                datasets: [{
+                    data: [created, assigned, work_in_progress, for_approval, approved, completed, close],
+                    backgroundColor: [
+                        '#0b537c',
+                        '#3f9ed5',
+                        '#1b3904',
+                        '#376810',
+                        '#7df7b9',
+                        '#638800',
+                        '#ecde69'
+                    ]
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: 'Status Distribution'
+                },
+                plugins: {
+                    'chartjs-3d-pie-chart': {
+                        enabled: true,
+                        depth: 20,
+                        angle: 30
+                    },
+                    title: {
+                        display: true,
+                        text: 'By Status',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        var fileDatas = [];
+
+        // File ID Chart
+        mongodData.forEach(item => {
+            var existingItem = fileDatas.find(data => data.user === item.fileId && data.status === item.status);
+            if (existingItem) {
+                existingItem.count++;
+            } else {
+                fileDatas.push({ user: item.fileId, status: item.status, count: 1 });
+            }
+        });
+        var userss = [...new Set(fileDatas.map(item => item.user))];
+        var statusess = [...new Set(fileDatas.map(item => item.status))];
+        var datasetss = statusess.map(status => {
+            return {
+                label: status,
+                data: userss.map(user => {
+                    var userData = fileDatas.find(item => item.user === user && item.status === status);
+                    let index = userData ? userData.count : 0;
+                    return userData ? userData.count : 0;
+                }),
+                backgroundColor: [
+                    '#0b537c',
+                    '#3f9ed5',
+                    '#1b3904',
+                    '#376810',
+                    '#7df7b9',
+                    '#638800',
+                    '#ecde69'
+                ][statusess.indexOf(status)], // Customize colors here
+            };
+        });
+        var ctxe = document.getElementById('myIdbarChart').getContext('2d');
+        myStackedBarChart = new Chart(ctxe, {
+        type: 'bar',
+        data: {
+            labels: userss,
+            datasets: datasetss,
+        },
+        options: {
+            scales: {
+                x: {
+                    stacked: true,
+                },
+                y: {
+                    stacked: true,
+                },
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'By File ID & Status',
+                },
+            },
+            animaiton: {
+                onComplete: function () {
+                    ctxe.textAlign = 'center';
+                    ctxe.textBaseline = 'bottom';
+                    var chartInstance = Chart.getChart('myIdbarChart'); // Get the chart instance by ID
+                    this.mongodata.datasets.forEach(function (dataset, i) {
+                        var meta = chartInstance.getDatasetMeta(i);
+                        meta.data.forEach(function (bar, index) {
+                            var data = dataset.data[index];
+                            ctxe.fillText(data, bar.x, bar.y);
+                        });
+                    });
+                }
+            }
+        },
+    });
+
+    var fileData = [];
+
+    // User Chart
+    mongodData.forEach(item => {
+        var existingItem = fileData.find(data => data.user === item.assign && data.status === item.status);
+        if (existingItem) {
+            existingItem.count++;
+        } else {
+            fileData.push({ user: item.assign, status: item.status, count: 1 });
+        }
+    });
+
+    var users = [...new Set(fileData.map(item => item.user))];
+    var statuses = [...new Set(fileData.map(item => item.status))];
+
+    var datasets = statuses.map((status, index) => {
+        return {
+            label: status,
+            data: users.map(user => {
+                var userData = fileData.find(item => item.user === user && item.status === status);
+                return userData ? userData.count : 0;
+            }),
+            backgroundColor: [
+                '#0b537c',
+                '#3f9ed5',
+                '#1b3904',
+                '#376810',
+                '#7df7b9',
+                '#638800',
+                '#ecde69'
+            ][index % 7], // Customize colors here
+        };
+    });
+
+    var ctxs = document.getElementById('myStackedBarChart').getContext('2d');
+    myStackedBarChart2 = new Chart(ctxs, {
+        type: 'bar',
+        data: {
+            labels: users,
+            datasets: datasets,
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'File Count By User and Status',
+                }
+            },
+            animaiton: {
+                onComplete: function () {
+                    ctxs.textAlign = 'center';
+                    ctxs.textBaseline = 'bottom';
+                    var chartInstance = Chart.getChart('myStackedBarChart'); // Get the chart instance by ID
+                    this.mongodata.datasets.forEach(function (dataset, i) {
+                        var meta = chartInstance.getDatasetMeta(i);
+                        meta.data.forEach(function (bar, index) {
+                            var data = dataset.data[index];
+                            ctxs.fillText(data, bar.x, bar.y);
+                        });
+                    });
+                }
+            }
+        },
+    });
+
+    var completedData = [];
+
+    // Calculate the count of files for each year with status "Completed"
+    mongodData.forEach(item => {
+        if (item.status === "Completed") {
+            var year = item.modifiedDate.split('/')[2]; // Extract year from the modified date
+            var existingItem = completedData.find(data => data.year === year);
+            if (existingItem) {
+                existingItem.count++;
+            } else {
+                completedData.push({ year: year, count: 1 });
+            }
+        }
+    });
+
+    // Sort the completedData by year in ascending order
+    completedData.sort((a, b) => a.year - b.year);
+
+    var years = completedData.map(item => item.year);
+    var fileNumbers = completedData.map(item => item.count);
+
+    var ctxy = document.getElementById('myFileChart').getContext('2d');
+    myFileChart = new Chart(ctxy, {
+        type: 'bar',
+        data: {
+            labels: years,
+            datasets: [{
+                label: 'File Numbers',
+                data: fileNumbers,
+                backgroundColor: '#69b0ec', // Customize color here
+            }],
+        },
+        options: {
+            indexAxis: 'x',
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'File Numbers by Year (Status: Completed)',
+                },
+            },
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        },
+    });
+    //location.reload();
+    }
+    handleInputChange(mongoData);
+
+</script>
+
+
+
+
+
+{% endblock %}

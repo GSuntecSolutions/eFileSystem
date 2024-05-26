@@ -1,0 +1,2377 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Dashboard {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{%block content%}
+
+
+<div class="container">
+  <div class="row custom-full-width mb-4">
+    <div class="col-md-9 mt-5 mb-5, d-flex justify-content-between px-6">
+      <button id = "Upload" class="btn btn-primary align-items-center col-md-5">
+        Upload
+      </button>
+      <button id = "Create" class="btn btn-primary align-items-center col-md-5">
+        Create
+      </button>
+    </div>
+  </div>
+</div>
+<div class="d-flex gap-3 justify-content-around text-nowrap col-md-12">
+  <iframe name="votar" style="display:none;"></iframe>
+  <div class = "col-md-8">
+    <div class = "row">
+      <div class="col-md-10 mt-4">
+        <div style = "display: none;" id="upload_file">
+          <div class="form-group flex-row d-flex flex-row " >
+            <label for="image" style="margin-right:1em; margin-top: 0.5em;">Upload File</label>
+              <div>
+              <input
+                type="file"
+                class="form-control col-md-6"
+                id = "fileInput"
+                accept=".docx, .pdf, .jpg, .jpeg, .png"
+                onchange="extractMetadatas()"
+              />
+              <div id="preview-container" class = "col-md-12 mt-5"></div>
+            </div>
+          </div>
+          <div class = 'd-flex flex-row col-md-12'>
+            <div class="d-flex mx-3 flex-row justify-center align-items-center">
+              <div class="form-group col-md-6">
+                <button id = "download"  class="btn btn-primary  mt-4 align-items-center" id="adhar"
+                  onclick="sendCustomData()"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-10" style = "display: none;" id = "use_template">
+        <div class = "d-flex flex-row align-items-center">
+          <div class="form-group" style = "margin-right: 1em;">
+            <label for="imagepan">Use Template</label>
+          </div>
+          <div class="col-md-10">
+            <select name="status" id="temple" class="form-control" onchange="handleSelectChange()">
+              <option selected>----Select----</option>
+              <option value="Customer Form">Customer Form</option>
+              <option value="Fir Form">FIR Form</option>
+              <option value="MSDA Form">MSDA Form</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id = "toggleDiv" style = "display: none;">
+      <h2 class="text-center mt-4" id = "subTitle" >
+        Customer Information
+      </h2>
+      <div class="row col-md-12 mt-4 mb-5 d-flex">
+        <div class="card col-md-12">
+          <div class="col-md-12 d-flex flex-column align-items-end" id="userData">
+            {% comment %} <div id = "divContent"> {% endcomment %}
+              <div class="col-md-12 mt-3 justify-content-between align-items-center" id = "customForm" style = "display: none;">
+                <div class ='row justify-content-between aling-items-center col-md-12 mt-4 px-1 mx-1'>
+                  <div class="col-md-6 gap-3 py-2 px-3">
+                    <label class="form-label text-nowrap" for="customerName">Customer Name</label>
+                    <input
+                      class="form-control"
+                      id="customerName"
+                      type="text"
+                      name="fatherName"
+                    />
+                  </div>
+                  <div class="col-md-6 gap-3 py-2 px-3">
+                    <label class="form-label text-nowrap" for="adharNo">Date of Birth</label>
+                    <input
+                      class="form-control"
+                      id="birth"
+                      type="date"
+                      name="adharNo"
+                    />
+                  </div>
+                </div>
+                <div class ='row justify-content-between aling-items-center col-md-12 mt-4 px-1 mx-1'>
+                  <div class="col-md-6 gap-3 py-2 px-3">
+                    <label class="form-label text-nowrap" for="panNo">PAN Number</label>
+                    <input
+                      class="form-control"
+                      id="panNumber"
+                      type="text"
+                      name="panNo"
+                    />
+                  </div>
+                  <div class="col-md-6 gap-3 py-2 px-3">
+                    <label class="form-label text-nowrap" for="adharNo">Adhar Number</label>
+                    <input
+                      class="form-control"
+                      id="adharNumber"
+                      type="text"
+                      name="adharNo"
+                    />
+                  </div>
+                </div>
+                <div class="col-md-12 gap-6 py-2 px-3">
+                  <label class="form-label text-nowrap" for="gender">Short Description</label>
+                  <textarea   cols="50" rows="2" id="shortDescription" class="form-control" style="font-size: 15px;">{{result}}</textarea>
+                </div>
+                <div class="col-md-12 gap-6 py-2 px-3">
+                  <label class="form-label text-nowrap" for="gender">Details</label>
+                  <textarea   cols="50" rows="10" id="detailsitem" class="form-control" style="font-size: 15px;">{{result}}</textarea>
+                </div>
+              </div>
+
+
+              <div class="col-md-12 mt-3 justify-content-between align-items-center" id = "firForm" style = "display: none;">
+                
+                <div class="d-flex flex-nowrap align-items-center gap-4 mx-4 mt-4">
+                  <label for="lang" class="form-label nowrap">Choose Language:</label>
+                  <div class="col-md-2">
+                    <select name="lang" id="lang" class="form-control col-md-1.5"  style = "width: 8em; height: 2em; padding: 0; padding-left: 1em">
+                        <option value="en" selected>English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="mr">Marathi</option>
+                    </select>
+                  </div> 
+                </div>
+                <div>
+                  <div class="form-group">
+                    <div class="col-md-12 my-3">
+                      <div class = "d-flex flex-row col-md-12 justify-content-between gap-3 ">
+                        1.
+                        <!-- <div>   </div> -->
+                        &nbsp;&nbsp;
+                        <div class="d-flex flex-column nowrap">
+                          <label for="dist" class="form-label" style="margin-top: -5px;">Dist</label>
+                          <label for="dist" class="form-label" style="margin-top: -10px;">जिल्हा</label> 
+                        </div>
+                        <input type="text" class="form-control" style="height: 2em;" id="dist" name="dist">
+                        <div class="d-flex flex-column text-nowrap">
+                            <label for="ps" class="form-label" style="margin-top: -5px;">PS</label>
+                            <label for="ps" class="form-label nowrap " style="margin-top: -10px;">पोलीस ठाणे</label> 
+                        </div>
+                        <input type="text" class="form-control" style="height: 2em;" id="ps" name="ps">
+                        <div class="d-flex flex-column text-nowrap">
+                            <label for="year" class="form-label" style="margin-top: -5px;">Year</label>
+                            <label for="year" class="form-label nowrap" style="margin-top: -10px;">वर्ष</label> 
+                        </div>
+                        <input type="text" class="form-control" style="height: 2em;" id="year" name="year">
+                      </div>
+                      <div class = "d-flex flex-row col-md-11 justify-content-between gap-3 " style = "margin-left: 3em;">
+                        <div class="d-flex flex-column text-nowrap ">
+                            <label for="firNo" class="form-label" style="margin-top: -5px;">FIR No</label>
+                            <label for="firNo" class="form-label nowrap" style="margin-top: -10px;">पहिली खबर क्र </label> 
+                        </div>
+                        <input type="text" class="form-control" style="height: 2em;" id="firNo" name="firNo">
+                        <div class="d-flex flex-column text-nowrap">
+                            <label for="firDate" class="form-label" style="margin-top: -5px;">Date</label>
+                            <label for="firDate" class="form-label nowrap" style="margin-top: -10px;">तारीख</label> 
+                        </div>
+                        <input type="text" class="form-control" style="height: 2em;" id="firDate" name="firDate">    
+                      </div>
+                    </div>
+                    <div class="d-flex flex-row gap-3 col-md-12 text-nowrap mb-2">
+                      2. (i)
+                      <div class="d-flex flex-column nowrap">
+                        <label for="act1" class="form-label" style="margin-top: -5px;">Act.</label>
+                        <label for="act1" class="form-label" style="margin-top: -10px;">अधिनियम</label> 
+                      </div>
+                      <input type="text" class="form-control" style="height: 2em;" id="act1" name="act1">
+                      <div class="d-flex flex-column text-nowrap">
+                        <label for="sections1" class="form-label" style="margin-top: -5px;">Sections</label>
+                        <label for="sections1" class="form-label nowrap " style="margin-top: -10px;">कलमे</label> 
+                      </div>
+                      <input type="text" class="form-control" style="height: 2em;" id="sections1" name="sections1">
+                    </div>
+                    <div class="d-flex flex-row gap-3 col-md-12 text-nowrap mb-2">
+                      &nbsp;&nbsp; (ii)
+                      <div class="d-flex flex-column nowrap">
+                        <label for="act4" class="form-label" style="margin-top: -5px;">Other Act. & Sections</label>
+                        <label for="act4" class="form-label" style="margin-top: -10px;">इतर अधिनियम व कलमे</label> 
+                      </div>
+                      <input type="text" class="form-control" style="height: 2em;" id="act4" name="act4">
+                    </div>
+                    <div class="text-nowrap mb-2">
+                      <div class = "d-flex flex-row gap-3 col-md-12" >
+                        3. (a)  
+                        <div class="d-flex flex-column nowrap " style="margin-top: -5px;">
+                            Occurance of Offence: <br>
+                            अपराधाची घटना
+                        </div>
+                      </div>
+                      <div  class = "d-flex flex-row gap-3 col-md-12">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <div class="d-flex flex-column nowrap">
+                          <label for="day" class="form-label" style="margin-top: -5px;">Day</label>
+                          <label for="day" class="form-label" style="margin-top: -10px;">वार</label> 
+                        </div>
+                        <input type="text" class="form-control" style="height: 2em;" id="day" name="day">
+                        <div class="d-flex flex-column nowrap">
+                          <label for="dateFrom" class="form-label" style="margin-top: -5px;">Date From</label>
+                          <label for="dateFrom" class="form-label" style="margin-top: -10px;">तारीख पासून</label> 
+                        </div>
+                        <input type="text" class="form-control" style="height: 2em;" id="dateFrom" name="dateFrom">
+                        <div class="d-flex flex-column nowrap">
+                            <label for="dateTo" class="form-label" style="margin-top: -5px;">Date To</label>
+                            <label for="dateTo" class="form-label" style="margin-top: -10px;">तारीख पर्यंत</label> 
+                        </div>
+                        <input type="text" class="form-control" style="height: 2em;" id="dateTo" name="dateTo">
+                      </div>
+                    </div>
+                    <div class="d-flex flex-row gap-3 col-md-12 text-nowrap mb-2">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <div class="d-flex flex-column nowrap">
+                        <label for="timePeriod" class="form-label" style="margin-top: -5px;">Time Period</label>
+                        <label for="timePeriod" class="form-label" style="margin-top: -10px;">वेळेचा अवधी</label> 
+                      </div>
+                      <input type="text" class="form-control" style="height: 2em;" id="timePeriod" name="timePeriod">
+                      <div class="d-flex flex-column nowrap">
+                          <label for="timeFrom" class="form-label" style="margin-top: -5px;">Time From</label>
+                          <label for="timeFrom" class="form-label" style="margin-top: -10px;">पासून</label> 
+                      </div>
+                      <input type="text" class="form-control" style="height: 2em;" id="timeFrom" name="timeFrom">
+                      <div class="d-flex flex-column nowrap">
+                          <label for="timeTo" class="form-label" style="margin-top: -5px;">Time To</label>
+                          <label for="timeTo" class="form-label" style="margin-top: -10px;">पर्यंत</label> 
+                      </div>
+                      <input type="text" class="form-control" style="height: 2em;" id="timeTo" name="timeTo">
+                    </div>
+                    <div class="d-flex flex-row gap-3 col-md-12 text-nowrap mb-2">
+                      &nbsp; &nbsp;&nbsp;(b)  
+                      <div class="d-flex flex-column nowrap">
+                        <label for="recvDate" class="form-label" style="margin-top: -5px;">Information received at P.S. Date</label>
+                        <label for="recvDate" class="form-label" style="margin-top: -10px;">पोलीस ठाण्यावर माहिती मिळण्याची तारीख</label> 
+                      </div>
+                      <input type="text" class="form-control" style="height: 2em;" id="recvDate" name="recvDate">
+                      <div class="d-flex flex-column nowrap">
+                        <label for="recvTime" class="form-label" style="margin-top: -5px;">Time</label>
+                        <label for="recvTime" class="form-label" style="margin-top: -10px;">वेळ</label> 
+                      </div>
+                      <input type="text" class="form-control" style="height: 2em;" id="recvTime" name="recvTime">
+                    </div>
+                    <div class="d-flex flex-row gap-3 col-md-12 text-nowrap mb-2">
+                      &nbsp; &nbsp;&nbsp;(c)  
+                      <div class="d-flex flex-column nowrap">
+                        <label for="refNo" class="form-label" style="margin-top: -5px;">General Diary Reference Entry No(s)</label>
+                        <label for="refNo" class="form-label" style="margin-top: -10px;">सर्वसाधरण रोजनिशीचा संदर्भ क्र.</label> 
+                      </div>
+                      <input type="text" class="form-control" style="height: 2em;" id="refNo" name="refNo">
+                      <div class="d-flex flex-column nowrap">
+                        <label for="refTime" class="form-label" style="margin-top: -5px;">Time</label>
+                        <label for="refTime" class="form-label" style="margin-top: -10px;">वेळ</label> 
+                      </div>
+                      <input type="text" class="form-control" style="height: 2em;" id="refTime" name="refTime">
+                    </div>
+                    <div class="d-flex flex-row gap-3 col-md-12 text-nowrap mb-2">
+                      4.   
+                      <div class="d-flex flex-column nowrap">
+                        <label for="infoType" class="form-label" style="margin-top: -5px;">Type of Information</label>
+                        <label for="infoType" class="form-label" style="margin-top: -10px;">माहितीचा प्रकार</label> 
+                      </div>
+                      <input type="text" class="form-control" style="height: 2em;" id="infoType" name="infoType">
+                      <div class="d-flex flex-column nowrap">
+                        <label for="writtenOral" class="form-label" style="margin-top: -5px;">Written / Oral</label>
+                        <label for="writtenOral" class="form-label" style="margin-top: -10px;">लेखी / तोंडी</label> 
+                      </div>
+                      <input type="text" class="form-control" style="height: 2em;" id="writtenOral" name="writtenOral">
+                    </div>
+                    <div class="col-md-12 text-nowrap mb-2">
+                      <div class = "d-flex flex-row col-md-12 gap-3 ">
+                        5.  
+                        <div class="d-flex flex-column nowrap " style="margin-top: -5px;">
+                            Place of Occurance: <br>
+                          घटनेचे ठिकाण
+                        </div>
+                      </div>
+                      <div class = "d-flex flex-row col-md-12 justify-content-between gap-3 ">
+                        <div class="d-flex flex-column nowrap " style="margin-top: -5px;">
+                          (a) Direction and Distance from P.S. <br>
+                          &nbsp;&nbsp;&nbsp;&nbsp; पोलिस ठाणे पासून दिशा आणि अंतर 
+                        </div>
+                        <input type="text" class="form-control" style="height: 2em;" id="direction" name="direction">
+                        <div class="d-flex flex-column nowrap " style="margin-top: -5px;">
+                          Beat. No. <br>
+                          गस्तक्षेत्र क्र.
+                        </div>
+                        <input type="text" class="form-control" style="height: 2em;" id="beatNo" name="beatNo">
+                      </div>
+                    </div>
+                    <div class="d-flex flex-row gap-3 col-md-12 text-nowrap mb-2">
+                      (b)
+                      <div class="d-flex flex-column nowrap " style="margin-top: -5px;">
+                              Address <br>
+                              पत्ता
+                      </div>
+                      <textarea name="address" id="address" cols="30" rows="10" class="form-control"></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-12 mt-3 justify-content-between align-items-center" id = "msdaForm" style = "display: none;">
+                <div class="d-flex flex-nowrap align-items-center gap-4 mx-4 mt-4">
+                  <label for="lang" class="form-label nowrap">Choose Language:</label>
+                  <div class="col-md-2">
+                    <select name="lang" id="language" class="form-control col-md-1.5"  style = "width: 8em; height: 2em; padding: 0; padding-left: 1em">
+                        <option value="en" selected>English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="mr">Marathi</option>
+                    </select>
+                  </div> 
+                </div>
+                <div class="card-body">
+                  {%csrf_token%}
+                    <div
+                      class="d-flex flex-row justify-content-between px-2 rounded py-3"
+                      style="background-color: royalblue; color: white; font-size: medium"
+                    >
+                      <div>Fill in the following Form for Registration</div>
+                      <div>*indicates a required field</div>
+                    </div>
+                    <div class="border-bottom border-top border-black border-3 my-3">
+                      <p class="mx-2" style="font-weight: bold; margin-top: 15px">
+                        Consumer Profile
+                      </p>
+                    </div>
+                    <div class="d-flex flex-row justify-content-between col-10 mx-2">
+                      <label for="consumerType" class="form-label col-6"
+                        >Consumer Type*</label
+                      >
+                      <!-- <input type="text" class="form-control" id="consumerType"> -->
+                      <select
+                        class="form-select"
+                        aria-label="Default select example"
+                        name="consumerType"
+                        id="consumerType"
+                      >
+                        <option selected>----Select----</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                      </select>
+                    </div>
+                    <div class="d-flex flex-row justify-content-between col-10 mt-3 mx-2">
+                      <label for="consumerNo" class="form-label col-6"
+                        >Consumer Number*</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="consumerNo"
+                        name="consumerNo"
+                      />
+                    </div>
+                    <p> <span id="interim1"></span></p>
+
+                    <div class="d-flex flex-row justify-content-between col-10 mt-3 mx-2">
+                      <label for="bu" class="form-label col-6">BU*</label>
+                      <!-- <input type="text" class="form-control" id="consumerType"> -->
+                      <select class="form-select" aria-label="bu select" name="bu" id="bu">
+                        <option selected>----Select----</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                      </select>
+                    </div>
+                    <div class="d-flex flex-row justify-content-between col-md-10 mt-3 mx-2">
+                      <label for="" class="form-label">Select Type*</label>
+                      <div class="d-flex flex-row gap-4 col-md-6">
+                        <div class="form-check">
+                          <input
+                            class="form-check-input"
+                            type="radio"
+                            name="actType"
+                            id="actType1"
+                            checked
+                          />
+                          <label class="form-check-label" for="actType1"> Individual </label>
+                        </div>
+                        <div class="form-check">
+                          <input
+                            class="form-check-input"
+                            type="radio"
+                            name="actType"
+                            id="actType2"
+                          />
+                          <label class="form-check-label" for="actType2">
+                            Company/Organization
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="d-flex flex-row justify-content-between col-10 mt-3 mx-2">
+                      <label for="firstName" class="form-label col-6">First Name*</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="firstName"
+                        name="firstName"
+                      />
+                    </div>
+                      <p class="text-center"> <span id="interim2"></span></p>
+                    <div class="d-flex flex-row justify-content-between col-10 mt-3 mx-2">
+                      <label for="middleName" class="form-label col-6">Middle Name*</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="middleName"
+                        name="middleName"
+                      />
+                    </div>
+                    <p class="text-center"> <span id="interim3"></span></p>
+                    <div class="d-flex flex-row justify-content-between col-10 mt-3 mx-2">
+                      <label for="lastName" class="form-label col-6">Last Name*</label>
+                      <input type="text" class="form-control" id="lastName" name="lastName" />
+                    </div>
+                    <p class="text-center"> <span id="interim4"></span></p>
+                    <div class="d-flex flex-row justify-content-between col-10 mt-3 mx-2">
+                      <label for="uid" class="form-label col-6">UID*</label>
+                      <input type="text" class="form-control" id="uid" name="uid" />
+                    </div>
+                    <div class="d-flex flex-row justify-content-between col-10 mx-2 mt-3">
+                      <label for="gender" class="form-label col-6">Gender*</label>
+                      <!-- <input type="text" class="form-control" id="consumerType"> -->
+                      <select class="form-select" name="gender" id="gender">
+                        <option selected>----Select----</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                      </select>
+                    </div>
+
+                    <div class="d-flex flex-row justify-content-between col-10 mx-2 mt-3">
+                      <label for="maritalStatus" class="form-label col-6"
+                        >Marital Status*</label
+                      >
+                      <!-- <input type="text" class="form-control" id="consumerType"> -->
+                      <select class="form-select" name="maritalStatus" id="maritalStatus">
+                        <option selected>----Select----</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                      </select>
+                    </div>
+
+                    <div class="d-flex flex-row justify-content-between col-10 mt-3 mx-2">
+                      <label for="dob" class="form-label col-6">Date of Birth*</label>
+                      <input type="datetime-local" class="form-control" id="dob" name="dob" />
+                    </div>
+
+                    <div class="border-bottom border-top border-black mt-3 border-3">
+                      <p class="mx-2" style="font-weight: bold; margin-top: 15px">
+                        Security Question & Answer
+                      </p>
+                    </div>
+
+                    <div class="d-flex flex-row justify-content-between col-10 mx-2 mt-3">
+                      <label for="securityQuestion" class="form-label col-6"
+                        >Security Question*</label
+                      >
+                      <!-- <input type="text" class="form-control" id="consumerType"> -->
+                      <select
+                        class="form-select"
+                        name="securityQuestion"
+                        id="securityQuestion"
+                      >
+                        <option selected>----Select----</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                      </select>
+                    </div>
+
+                    <div class="d-flex flex-row justify-content-between col-10 mt-3 mx-2">
+                      <label for="securityAnswer" class="form-label col-6"
+                        >Security Answer*</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="securityAnswer"
+                        name="securityAnswer"
+                      />
+                    </div>
+
+                    <div class="border-bottom border-top border-black mt-3 border-3">
+                      <p class="mx-2" style="font-weight: bold; margin-top: 15px">
+                        Consumer Demographic Information
+                      </p>
+                    </div>
+
+                    <div class="d-flex flex-row justify-content-between col-10 mt-3 mx-2">
+                      <label for="address1" class="form-label col-6">Address 1*</label>
+                      <input type="text" class="form-control" id="address1" name="address1" />
+                    </div>
+
+                    <div class="d-flex flex-row justify-content-between col-10 mt-3 mx-2">
+                      <label for="address2" class="form-label col-6">Address 2*</label>
+                      <input type="text" class="form-control" id="address2" name="address2" />
+                    </div>
+
+                    <div class="d-flex flex-row justify-content-between col-10 mt-3 mx-2">
+                      <label for="city" class="form-label col-6">Village/ Town/ City*</label>
+                      <input type="text" class="form-control" id="city" name="city" />
+                    </div>
+                    <div class="d-flex flex-row justify-content-between col-10 mx-2 mt-3">
+                      <label for="state" class="form-label col-6">State*</label>
+                      <!-- <input type="text" class="form-control" id="consumerType"> -->
+                      <select class="form-select" name="state" id="state">
+                        <option selected>----Select----</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                      </select>
+                    </div>
+
+                    <div class="d-flex flex-row justify-content-between col-10 mx-2 mt-3">
+                      <label for="country" class="form-label col-6">Country*</label>
+                      <!-- <input type="text" class="form-control" id="consumerType"> -->
+                      <select class="form-select" name="country" id="country">
+                        <option selected>----Select----</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                      </select>
+                    </div>
+                    <div class="d-flex flex-row justify-content-between col-10 mt-3 mx-2">
+                      <label for="pincode" class="form-label col-6">Pin Code*</label>
+                      <input type="text" class="form-control" id="pincode" name="pincode" />
+                    </div>
+                  </div>
+              </div>
+            {% comment %} </div> {% endcomment %}
+            <div  id = "assets"  class="d-flex flex-row justify-content-between align-items-center col-md-12">
+              <div id = "assests" class="d-flex flex-row justify-content-between align-items-center col-md-12 px-1 mx-1">
+                <div class="col-md-4 py-2 px-3 d-flex flex-row align-items-center">
+                  <label class="form-label text-nowrap" for="inputImage" title="Upload image file">
+                    <input type="file" class="sr-only" id="inputImage" name="file[]" accept=".jpg,.jpeg,.png,.gif,.bmp,.tiff" multiple>
+                    <img src="/static/assets/img/attach.svg" alt="Pen Image" id="attach" style="width: 1.5em; height: 1.5em;">
+                  </label>
+                  <label id="attach_name" class="text-wrap col-md-10"></label>
+                </div>
+                <div class="col-md-4 py-2 px-5 d-flex flex-row align-items-center">
+                  <label class="form-label text-nowrap" for="" title="Upload image file" data-toggle="modal" data-target="#link_modal">
+                    <img src="/static/assets/img/link.svg" alt="Link Image" id="attach" style="width: 1.5em; height: 1.5em;">
+                  </label>
+                  <p id="link_name" class="text-wrap col-md-8" onclick="handlehiper()"></p>
+                    <div class="modal fade" id="link_modal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel">Link Files</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <select name="link_state" id="link_array" class="form-control">
+                              <option selected>----Select----</option>
+                            </select>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal" id="confirmAdd">Add</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 py-2 px-3 d-flex flex-row align-items-center">
+                    <input class="form-check-input mb-2" type="checkbox" value="" id="checkboxExample">
+                    <label class="form-label text-nowrap" for="fatherName" style = "margin-left: 1em;">Approval</label>
+                </div>
+              </div>
+            </div>
+            <div id='btns' class="d-flex flex-row flex-wrap justify-content-center col-md-12">
+                <div class="mx-3 my-2 col-md-3">
+                    <form class="form-group" onsubmit="submitForm(event)">
+                        <button id="download" class="btn btn-primary btn-block" id="adhar" onclick="generatePDF()">
+                            Download
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="mx-3 my-2 col-md-3">
+                    <button id="submit" class="btn btn-primary btn-block" id="adhar" data-toggle="modal" data-target="#draft_modal">
+                        Save as Draft
+                    </button>
+                    <div class="modal fade  col-md-10" id="draft_modal" tabindex="-1" aria-labelledby="draftModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="draftModalLabel">draft Files</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <div class = "table-responsive">
+                              <table class="table table-bordered col-md-12">
+                                <thead>
+                                  <tr>
+                                    <th>#</th>
+                                    <th>File ID</th>
+                                    <th>File Name</th>
+                                    <th>File STATUS</th>
+                                    <th>Created Date</th>
+                                    <th>Modified Date</th>
+                                    <th>Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody id="filesTableBody">
+                                  <!-- Display 'files' data in the table -->
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal" id="draftAdd" onclick="sendDraftData()">Add</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                  <!-- Confirmation Modal -->
+                <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="confirmationModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        Are you sure you want to delete this Draft?
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mx-3 my-2 col-md-3">
+                    <button id="submit" class="btn btn-primary btn-block" id="adhar" onclick="sendCustomData()">
+                      Submit
+                    </button>
+                </div>
+            </div>
+            
+                <div id = "commented" class="col-md-12 gap-6 py-2 px-3 flex-start">
+                  <label class="form-label text-nowrap" for="gender">Comment</label>
+                  <textarea   cols="50" rows="2" id="comment" class="form-control" style="font-size: 15px;">{{result}}</textarea>
+                </div>
+              </div>
+              <!-- </textarea> -->
+              <p id="userexists"></p>
+            </div>
+          </div>
+        </div>
+        <div id = "save_as_draft" style = "display: none;">
+
+        </div>
+        <div class="modal fade" id="modal-notification" tabindex="-1" role="dialog" aria-labelledby="modal-notification" aria-hidden="true">
+          <div class="modal-dialog modal-white modal-dialog-centered" role="document">
+              <div class="modal-content bg-gradient-white">
+                  <!-- <button type="button" class="btn-close  theme-settings-close fs-6 ms-auto" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                  <!-- <div class="modal-header">
+                      <p class="modal-title text-gray-200" id="modal-title-notification">A new experience, personalized for you.</p>
+                  </div> -->
+                  <div class="modal-body text-danger">
+                      <div class="py-3 text-center">
+                          <!-- <span class="modal-icon">
+                            <i class="fa fa-exclamation-circle" style="font-size:20px;color:red"></i>
+                            
+                            <svg class="icon icon-xl text-gray-200" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z"></path><path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"></path></svg> -->
+                          <!-- </span> --> 
+                          <h2 class="h2 modal-title my-2">User Exists</h2>
+                          <!-- <p>Do you know that you can assign status and relation to a company right in the visit list?</p> -->
+                      </div>
+                  </div>
+                  <!-- <div class="modal-footer"> -->
+                      <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Close</button>
+                  <!-- </div> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      <div class ="col-md-4, ml-3 px-3">
+        <label for="toggleProperties" id="toggleLabel">
+          <i id="icon" class="fa fa-chevron-left"></i>
+          Details
+        </label>
+        <div id="properties" style="display: none;" class = "mb-2">
+            <!-- Properties to show/hide -->
+            <div class = "d-flex flex-row col-md-12 align-items-center justify-content-between" >
+              <label class="mb-2">Status: </label>
+              <div class="col-md-8" style = "height: 2.5em; margin-left: 0.5em;">
+                <select name="status" id="status" class="form-control" style = "height: 2.5em;">
+                  <option value="Created" selected>Created</option>
+                  <option value="Assigned">Assigned</option>
+                  <option value="Work in Progress">Work in Progress</option>
+                  <option value="For Approval">For Approval</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Closed">Closed</option>
+                </select>
+              </div>
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center justify-content-between" >
+              <label class="mb-2">File Name: </label>
+              <div class="col-md-8" style = "height: 2.5em; margin-left: 0.5em;">
+                <input
+                  class="form-control"
+                  id="fileName"
+                  type="text"
+                  name="adharNo" 
+                  style = "height: 2.5em;"
+                />
+              </div>
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center" >
+              <label class="mb-2">File ID: </label>
+              <div class="mb-2" id='fileId' style = "margin-left: 1em;">{{unique_id}}</div>
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center justify-content-between" >
+              <label class="mb-2">Assigned To: </label>
+              <div class="col-md-7" style = "height: 2.5em; margin-left: 0.5em;">
+                <select name="status" id="assign" class="form-control">
+                </select>
+              </div>
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center justify-content-between" >
+              <label class="mb-2">Labels: </label>
+              <div class="col-md-8" style = "height: 2.5em; margin-left: 0.5em;">
+                <input
+                  class="form-control"
+                  id="labels"
+                  type="text"
+                  name="adharNo"
+                  style = "height: 2.5em;"
+                />
+              </div>
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center" >
+              <label class="mb-2">Created Date: </label>
+              <div class="mb-2" id='createDate' style = "margin-left: 1em;"></div>
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center" >
+              <label class="mb-2">Created By: </label>
+              <div class="mb-2" id="createdBy" style = "margin-left: 1em;"></div>
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center" >
+              <label class="mb-2">Modified By: </label>
+              <div class="mb-2" id="modifiedBy" style = "margin-left: 1em;"></div>
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center" >
+              <label class="mb-2">Modified Date: </label>
+              <div class="mb-2" id="modifiedDate" style = "margin-left: 1em;"></div>
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center justify-content-between" >
+              <label class="mb-2">Priority: </label>
+                <div class="col-md-8" style = "height: 2.5em; margin-left: 0.5em;">
+                <select name="status" id="priority" class="form-control">
+                  <option value="High" selected>High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center justify-content-between" >
+              <label class="mb-2">System: </label>
+              <div class="col-md-8" style = "height: 2.5em; margin-left: 0.5em;">
+                <select name="status" id="system" class="form-control">
+                  <option value="System A" selected>System A</option>
+                  <option value="System B">System B</option>
+                  <option value="System C">System C</option>
+                  <option value="System D">System D</option>
+                </select>
+              </div>
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center" >
+              <label class="mb-2">Approved By: </label>
+              <div class="mb-2" id="approvedBy" style = "margin-left: 1em;"></div> 
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center" >
+              <label class="mb-2">Approved Date: </label>
+              <div class="mb-2" id="currentTime" style = "margin-left: 1em;"></div>
+            </div>
+            <br>
+            <div class = "d-flex flex-row col-md-12 align-items-center justify-content-between" >
+              <label class="mb-2">Target Date: </label>
+              <div class="col-md-8" style = "height: 2.5em; margin-left: 0.5em;">
+                <input
+                  class="form-control"
+                  id="target_date"
+                  type="date"
+                  name="adharNo"
+                  style = "height: 2.5em;"
+                />
+              </div>
+            </div>
+            <br>
+        </div>
+      </div>
+    </div>
+
+  </div>
+ <!-- <script src="https://code.jquery.com/jquery-3.5.1.js"  -->
+ <!--          integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="  -->
+ <!--            crossorigin="anonymous"></script> -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<!-- url input-->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% comment %} <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> {% endcomment %}
+<script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+
+<script>
+  let mongodbData = JSON.parse('{{ json_data|escapejs }}');
+  let button_select = ''; 
+  var username = "{{ username }}";
+  var usernames = "{{ request.session.usernames|escapejs }}";
+  localStorage.setItem('username', username);
+  //console.log("mongod----------->", usernames)
+  let uploadFile;
+  let uploadFileType;
+  let uploadElement = document.getElementById("upload_file");
+  let templateElement = document.getElementById("use_template");
+  let selectedOption = document.getElementById('temple').value;
+  let attach = document.getElementById('inputImage').value;
+  let linkfile = document.getElementById('link_name').textContent;
+  let approved = document.getElementById('checkboxExample').checked;
+  let customerName = document.getElementById('customerName').value;
+  let birth = document.getElementById('birth').value;
+  let panNumber = document.getElementById('panNumber').value;
+  let adharNumber = document.getElementById('adharNumber').value;
+  let shortDescription = document.getElementById('shortDescription').value;
+  let detailsitem = document.getElementById('detailsitem').value;
+  let comment = document.getElementById('comment').value;
+  let status = document.getElementById('status').value;
+  let fileName = document.getElementById('fileName').value;
+  let fileId = document.getElementById('fileId').innerText;
+  let assign = document.getElementById("assign").value;
+  let labels = document.getElementById("labels").value;
+  let createDate = document.getElementById('createDate').innerText;
+  let createdBy = document.getElementById('createdBy').innerText;
+  let modifiedBy = document.getElementById('modifiedBy').innerText;
+  let modifiedDate = document.getElementById('modifiedDate').innerText;
+  let priority = document.getElementById("priority").value;
+  let system = document.getElementById("system").value;
+  let approvedBy = document.getElementById('fileId').approvedByv;
+  let currentTime = document.getElementById('currentTime').innerText;
+  let target_date = document.getElementById("target_date").value;
+
+  let dist = document.getElementById("dist").value;
+  let ps = document.getElementById("ps").value;
+  let year = document.getElementById("year").value;
+  let firNo = document.getElementById("firNo").value;
+  let firDate = document.getElementById("firDate").value;
+  let act1 = document.getElementById("act1").value;
+  let sections1 = document.getElementById("sections1").value;
+  let act4 = document.getElementById("act4").value;
+  let day = document.getElementById("day").value;
+  let dateFrom = document.getElementById("dateFrom").value;
+  let dateTo = document.getElementById("dateTo").value;
+  let timePeriod = document.getElementById("timePeriod").value;
+  let timeFrom = document.getElementById("timeFrom").value;
+  let timeTo = document.getElementById("timeTo").value;
+  let recvDate = document.getElementById("recvDate").value;
+  let recvTime = document.getElementById("recvTime").value;
+  let refNo = document.getElementById("refNo").value;
+  let refTime = document.getElementById("refTime").value;
+  let infoType = document.getElementById("infoType").value;
+  let writtenOral = document.getElementById("writtenOral").value;
+  let direction = document.getElementById("direction").value;
+  let beatNo = document.getElementById("beatNo").value;
+  let address = document.getElementById("address").value;
+
+  let consumerType = document.getElementById("consumerType").value;
+  let consumerNo = document.getElementById("consumerNo").value;
+  let bu = document.getElementById("bu").value;
+  let actType1 = document.getElementById("actType1").value;
+  let actType2 = document.getElementById("actType2").value;
+  let firstName = document.getElementById("firstName").value;
+  let middleName = document.getElementById("middleName").value;
+  let lastName = document.getElementById("lastName").value;
+  let uid = document.getElementById("uid").value;
+  let gender = document.getElementById("gender").value;
+  let maritalStatus = document.getElementById("maritalStatus").value;
+  let dob = document.getElementById("dob").value;
+  let securityQuestion = document.getElementById("securityQuestion").value;
+  let securityAnswer = document.getElementById("securityAnswer").value;
+  let address1 = document.getElementById("address1").value;
+  let address2 = document.getElementById("address2").value;
+  let city = document.getElementById("city").value;
+  let state = document.getElementById("state").value;
+  let country = document.getElementById("country").value;
+  let pincode = document.getElementById("pincode").value;
+  let draft = false;
+  let uniqueId = "{{unique_id}}";
+        // Function to save state data to session storage
+  function saveState() {
+    //('save');
+    selectedOption = document.getElementById("temple").value;
+    attach = document.getElementById('attach_name').innerText;
+    attach_file = document.getElementById("inputImage").value;
+    linkfile = document.getElementById('link_name').textContent;
+    approved = document.getElementById('checkboxExample').checked;
+    title = document.getElementById('subTitle').innerText;
+    customerName = document.getElementById('customerName').value;
+    birth = document.getElementById('birth').value;
+    panNumber = document.getElementById('panNumber').value;
+    adharNumber = document.getElementById('adharNumber').value;
+    shortDescription = document.getElementById('shortDescription').value;
+    detailsitem = document.getElementById('detailsitem').value;
+    comment = document.getElementById('comment').value;
+    status = document.getElementById('status').value;
+    fileName = document.getElementById('fileName').value;
+    fileId = document.getElementById('fileId').innerText;
+    assign = document.getElementById("assign").value;
+    labels = document.getElementById("labels").value;
+    createDate = document.getElementById('createDate').innerText;
+    createdBy = document.getElementById('createdBy').innerText;
+    modifiedBy = document.getElementById('modifiedBy').innerText;
+    modifiedDate = document.getElementById('modifiedDate').innerText;
+    priority = document.getElementById("priority").value;
+    system = document.getElementById("system").value;
+    approvedBy = document.getElementById('fileId').approvedByv;
+    currentTime = document.getElementById('currentTime').innerText;
+    target_date = document.getElementById("target_date").value;
+    dist = document.getElementById("dist").value;
+    ps = document.getElementById("ps").value;
+    year = document.getElementById("year").value;
+    firNo = document.getElementById("firNo").value;
+    firDate = document.getElementById("firDate").value;
+    act1 = document.getElementById("act1").value;
+    sections1 = document.getElementById("sections1").value;
+    act4 = document.getElementById("act4").value;
+    day = document.getElementById("day").value;
+    dateFrom = document.getElementById("dateFrom").value;
+    dateTo = document.getElementById("dateTo").value;
+    timePeriod = document.getElementById("timePeriod").value;
+    timeFrom = document.getElementById("timeFrom").value;
+    timeTo = document.getElementById("timeTo").value;
+    recvDate = document.getElementById("recvDate").value;
+    recvTime = document.getElementById("recvTime").value;
+    refNo = document.getElementById("refNo").value;
+    refTime = document.getElementById("refTime").value;
+    infoType = document.getElementById("infoType").value;
+    writtenOral = document.getElementById("writtenOral").value;
+    direction = document.getElementById("direction").value;
+    beatNo = document.getElementById("beatNo").value;
+    address = document.getElementById("address").value;
+    consumerType = document.getElementById("consumerType").value;
+    consumerNo = document.getElementById("consumerNo").value;
+    bu = document.getElementById("bu").value;
+    actType1 = document.getElementById("actType1").value;
+    actType2 = document.getElementById("actType2").value;
+    firstName = document.getElementById("firstName").value;
+    middleName = document.getElementById("middleName").value;
+    lastName = document.getElementById("lastName").value;
+    uid = document.getElementById("uid").value;
+    gender = document.getElementById("gender").value;
+    maritalStatus = document.getElementById("maritalStatus").value;
+    dob = document.getElementById("dob").value;
+    securityQuestion = document.getElementById("securityQuestion").value;
+    securityAnswer = document.getElementById("securityAnswer").value;
+    address1 = document.getElementById("address1").value;
+    address2 = document.getElementById("address2").value;
+    city = document.getElementById("city").value;
+    state = document.getElementById("state").value;
+    country = document.getElementById("country").value;
+    pincode = document.getElementById("pincode").value;
+    uploadFile = document.getElementById("fileInput").value;
+    sessionStorage.setItem('page1State', JSON.stringify({ 
+      button_select: button_select, 
+      selectedOption: selectedOption,
+      attach: attach,
+      attach_file: attach_file,
+      linkfile: linkfile,
+      approved: approved,
+      customerName: customerName,
+      birth: birth,
+      panNumber: panNumber,
+      adharNumber: adharNumber,
+      shortDescription: shortDescription,
+      detailsitem: detailsitem,
+      comment: comment,
+      status: status,
+      fileName: fileName,
+      labels: labels,
+      fileId: fileId,
+      assign: assign,
+      createDate: createDate,
+      createdBy: createdBy,
+      modifiedBy: modifiedBy,
+      modifiedDate: modifiedDate,
+      priority: priority,
+      system: system,
+      currentTime: currentTime,
+      target_date: target_date,
+      dist: dist,
+      ps: ps,
+      year: year,
+      firNo:firNo,
+      firDate: firDate,
+      act1: act1,
+      sections1: sections1,
+      act4: act4,
+      day: day,
+      dateFrom: dateFrom,
+      dateTo: dateTo,
+      timePeriod: timePeriod,
+      timeFrom: timeFrom,
+      timeTo: timeTo,
+      recvDate: recvDate,
+      recvTime: recvTime,
+      refNo: refNo,
+      refTime: refTime,
+      infoType: infoType,
+      writtenOral: writtenOral,
+      direction: direction,
+      beatNo: beatNo,
+      address: address,
+      consumerType: consumerType,
+      consumerNo: consumerNo,
+      bu: bu,
+      actType1: actType1,
+      actType2: actType2,
+      firstName: firstName,
+      middleName: middleName,
+      lastName: lastName,
+      uid: uid,
+      gender: gender,
+      maritalStatus: maritalStatus, 
+      dob: dob,
+      securityQuestion: securityQuestion,
+      securityAnswer: securityAnswer,
+      address1: address1,
+      address2: address2,
+      city: city,
+      state: state,
+      country: country,
+      pincode: pincode,
+      draft: draft,
+      uploadFile: uploadFile,
+      uploadFileType: uploadFileType
+    }));
+    //console.log('State saved!');
+  }
+  function clearSession() {
+    //console.log('Clear------------------------>');
+    let data = JSON.parse(sessionStorage.getItem('page1State')) || {};
+    data.button_select= button_select, 
+    selectedOption = document.getElementById("temple").value;
+    data.attach = "";
+    data.attach.file = "";
+    data.linkfile = "";
+    data.approved = "";
+    data.title = "";
+    data.customerName = "";
+    data.birth = "";
+    data.panNumber = "";
+    data.adharNumber = "";
+    data.shortDescription = "";
+    data.detailsitem = "";
+    data.comment = "";
+    data.status = "";
+    data.fileName = "";
+    data.fileId = "";
+    data.assign = "";
+    data.labels = "";
+    data.createDate = "";
+    data.createdBy = "";
+    data.modifiedBy = "";
+    data.modifiedDate = "";
+    data.priority = "";
+    data.system = "";
+    data.approvedBy = "";
+    data.currentTime = "";
+    data.target_date = "";
+    data.dist = "";
+    data.ps = "";
+    data.year = "";
+    data.firNo = "";
+    data.firDate = "";
+    data.act1 = "";
+    data.sections1 = "";
+    data.act4 = "";
+    data.day = "";
+    data.dateFrom = "";
+    data.dateTo = "";
+    data.timePeriod = "";
+    data.timeFrom = "";
+    data.timeTo = "";
+    data.recvDate = "";
+    data.recvTime = "";
+    data.refNo = "";
+    data.refTime = "";
+    data.infoType = "";
+    data.writtenOral = "";
+    data.direction = "";
+    data.beatNo = "";
+    data.address = "";
+    data.consumerType = "";
+    data.consumerNo = "";
+    data.bu = "";
+    data.actType1 = "";
+    data.actType2 = "";
+    data.firstName = "";
+    data.middleName = "";
+    data.lastName = "";
+    data.uid = "";
+    data.gender = "";
+    data.maritalStatus = "";
+    data.dob = "";
+    data.securityQuestion = "";
+    data.securityAnswer = "";
+    data.address1 = "";
+    data.address2 = "";
+    data.city = "";
+    data.state = "";
+    data.country = "";
+    data.pincode = "";
+    data.uploadFile = "";
+    sessionStorage.setItem('page1State', JSON.stringify({ data
+    }));
+    //console.log('State saved!', data);
+  }
+  window.addEventListener('beforeunload', function (e) {
+      saveState();
+  });
+  {% comment %} document.getElementById("inputImage").addEventListener('change', function (){
+    document.getElementById('attach_name').innerText = document.getElementById('inputImage').value;
+  }); {% endcomment %}
+  document.getElementById("inputImage").addEventListener('change', function () {
+    const input = document.getElementById('inputImage');
+    console.log(input.value);
+    const fileName = input.files[0].name;
+    document.getElementById('attach_name').innerText = fileName;
+  });
+
+  // Check if there is stored state data when the page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    onLoading();
+  });
+  function onLoading () {
+    var storedState = sessionStorage.getItem('page1State');
+    //console.log('storedState', storedState);
+    if (storedState) {
+      var stateData = JSON.parse(storedState);
+      button_select = stateData.button_select || "";
+      var setElement = stateData.selectedOption;
+      selectedOption = stateData.selectedOption || "";
+      document.getElementById('temple').value = selectedOption;
+      attach = stateData.attach || "";
+      document.getElementById('attach_name').innerText = attach
+      linkfile = stateData.linkfile || "";
+      document.getElementById('link_name').textContent = linkfile;
+      approved = stateData.approved || "";
+      document.getElementById('checkboxExample').checked = approved;
+      customerName = stateData.customerName || "";
+      document.getElementById('customerName').value = customerName;
+      birth = stateData.birth || "";
+      document.getElementById('birth').value = birth || "";
+      panNumber = stateData.panNumber || "";
+      document.getElementById('panNumber').value = panNumber;
+      adharNumber = stateData.adharNumber || "";
+      document.getElementById('adharNumber').value = adharNumber;
+      shortDescription = stateData.shortDescription || "";
+      document.getElementById('shortDescription').value = shortDescription;
+      detailsitem = stateData.detailsitem || "";
+      document.getElementById('detailsitem').value = detailsitem;
+      comment = stateData.comment || "";
+      document.getElementById('comment').value = comment;
+      status = stateData.status || "";
+      document.getElementById('status').value = status;
+      fileName = stateData.fileName || "";
+      document.getElementById('fileName').value = fileName;
+      fileId = stateData.fileId;
+      document.getElementById('fileId').innerText = fileId;
+      assign = stateData.assign || "";
+      document.getElementById('assign').value = assign;
+      labels = stateData.labels || "";
+      document.getElementById('labels').value = labels;
+      createDate = stateData.createDate || "";
+      document.getElementById('createDate').innerText = createDate;
+      createdBy = stateData.createdBy || "";
+      document.getElementById('createdBy').innerText = createdBy;
+      modifiedDate = stateData.modifiedDate || "";
+      document.getElementById('modifiedDate').innerText = modifiedDate;
+      modifiedBy = stateData.modifiedBy || "";
+      document.getElementById('modifiedBy').innerText = modifiedBy;
+      priority = stateData.priority || "";
+      document.getElementById('priority').value = priority;
+      system = stateData.system || "";
+      document.getElementById('system').value = system;
+      approvedBy = stateData.approvedBy || "";
+      document.getElementById('approvedBy').innerText = approvedBy;
+      approvedDate = stateData.approvedDate || "";
+      document.getElementById('currentTime').innerText = approvedDate;
+      target_date = stateData.target_date || "";
+      document.getElementById('target_date').innerText = target_date;
+      dist = stateData.dist || "";
+      document.getElementById('dist').value = dist;
+      ps = stateData.ps || "";
+      document.getElementById('ps').value = ps;
+      year = stateData.year || "";
+      document.getElementById('year').value = year;
+      firNo = stateData.firNo || "";
+      document.getElementById('firNo').value = firNo;
+      firDate = stateData.firDate || "";
+      document.getElementById('firDate').value = firDate;
+      act1 = stateData.act1 || "";
+      document.getElementById('act1').value = act1;
+      sections1 = stateData.sections1 || "";
+      document.getElementById('sections1').value = sections1;
+      act4 = stateData.act4 || "";
+      document.getElementById('act4').value = act4;
+      day = stateData.day || "";
+      document.getElementById('day').value = day;
+      dateFrom = stateData.dateFrom || "";
+      document.getElementById('dateFrom').value = dateFrom;
+      dateTo = stateData.dateTo || "";
+      document.getElementById('dateTo').value = dateTo;
+      timePeriod = stateData.timePeriod || "";
+      document.getElementById('timePeriod').value = timePeriod;
+      timeFrom = stateData.timeFrom || "";
+      document.getElementById('timeFrom').value = timeFrom;
+      timeTo = stateData.timeTo || "";
+      document.getElementById('timeTo').value = timeTo;
+      recvDate = stateData.recvDate || "";
+      document.getElementById('recvDate').value = recvDate;
+      recvTime = stateData.recvTime || "";
+      document.getElementById('recvTime').value = recvTime;
+      refNo = stateData.refNo || "";
+      document.getElementById('refNo').value = refNo;
+      refTime = stateData.refTime || "";
+      document.getElementById('refTime').value = refTime;
+      infoType = stateData.infoType || "";
+      document.getElementById('infoType').value = infoType;
+      writtenOral = stateData.writtenOral || "";
+      document.getElementById('writtenOral').value = writtenOral;
+      direction = stateData.direction || "";
+      document.getElementById('direction').value = direction;
+      beatNo = stateData.beatNo || "";
+      document.getElementById('beatNo').value = beatNo;
+      address = stateData.address || "";
+      document.getElementById('address').value = address;
+      uploadFile = stateData.address || "";
+      document.getElementById('fileInput').value = uploadFile;
+      consumerType = stateData.consumerType || "";
+      document.getElementById('consumerType').value = consumerType;
+      consumerNo = stateData.consumerNo || "";
+      document.getElementById('consumerNo').value = consumerNo;
+      bu = stateData.bu || "";
+      document.getElementById('bu').value = bu;
+      actType1 = stateData.actType1 || "";
+      document.getElementById('actType1').value = actType1;
+      actType2 = stateData.actType2 || "";
+      document.getElementById('actType2').value = actType2;
+      firstName = stateData.firstName || "";
+      document.getElementById('firstName').value = firstName;
+      middleName = stateData.middleName || "";
+      document.getElementById('middleName').value = middleName;
+      lastName = stateData.lastName || "";
+      document.getElementById('lastName').value = lastName;
+      uid = stateData.uid || "";
+      document.getElementById('uid').value = uid;
+      gender = stateData.gender || "";
+      document.getElementById('gender').value = gender;
+      maritalStatus = stateData.maritalStatus || "";
+      document.getElementById('maritalStatus').value = maritalStatus;
+      dob = stateData.dob || "";
+      document.getElementById('dob').value = dob;
+      securityQuestion = stateData.securityQuestion || "";
+      document.getElementById('securityQuestion').value = securityQuestion;
+      securityAnswer = stateData.securityAnswer || "";
+      document.getElementById('securityAnswer').value = securityAnswer;
+      address1 = stateData.address1 || "";
+      document.getElementById('address1').value = address1;
+      address2 = stateData.address2 || "";
+      document.getElementById('address2').value = address2;
+      city = stateData.city || "";
+      document.getElementById('city').value = city;
+      state = stateData.state || "";
+      document.getElementById('state').value = state;
+      country = stateData.country || "";
+      document.getElementById('country').value = country;
+      pincode = stateData.pincode || "";
+      document.getElementById('pincode').value = pincode;
+      uploadFile = stateData.uploadFile;
+      //document.getElementById("fileInput").value = uploadFile;
+      //uploadFileType = stateData.uploadFileType;
+      //if (uploadFile ) {
+      //  displayFilePreview(uploadFile, uploadFileType);
+      //}
+    }
+    console.log('storedState', storedState)
+    sel_btn();
+    sel_option(selectedOption);
+    sel_approval();
+    sel_assign();
+    document.getElementById('subTitle').innerText = selectedOption;
+  }
+
+  {% comment %} function initPdf() { {% endcomment %}
+    function printCustomDiv (id) {
+//      var divContents = document.getElementById(id).innerHTML;
+//      var divfooter = document.getElementById('assests').innerHTML;
+//      var popupWin = window.open('', '', 'height=500, width=500');
+//      popupWin.document.write('<html><head><title>'+ id +'</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css"></head><body>');
+//      popupWin.document.write(divContents + divfooter);
+//      popupWin.document.write('</body></html>');
+//      popupWin.document.close();
+//      popupWin.print();
+        const fileId = document.getElementById('fileId').innerText;
+        const element = document.getElementById('toggleDiv');
+        document.getElementById('commented').style.display="none";
+        document.getElementById('btns').style.display = "none";
+        const ele = element;
+        if (id === "customForm") {
+          ele.style.height = "700px";
+          ele.style.width = "95%";
+        }
+        else if (id === "firForm") {
+          ele.style.height = "700px";
+          ele.style.width = "95%";
+        }
+        else if (id === "msdaForm") {
+          ele.style.height = "700px";
+          ele.style.width = "95%";
+        }
+        
+        const divfooter = document.getElementById('assets');
+        const elements = "<div style = 'width: 100%; height: 100%;'>"+ element + divfooter + "</div>"
+        html2pdf()
+            .set({
+                margin: 10,
+                filename: fileId+'.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 3, logging: true, dpi: 195, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'b5', orientation: 'portrait' },
+                scrollX: window.innerWidth,
+                scrollY: window.innerHeight,
+            })
+            .from(ele)
+            .toPdf()
+            .get('pdf')
+            .save()
+            .then(function(pdf) {
+              location.reload();
+            });
+      //var doc = new jsPDF();
+      //doc.fromHTML('<html><head><title>'+ id +'</title><link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"></head><body>' + divContents + divfooter + '</body></html>');
+      //doc.save('printed_data.pdf');
+      //html2pdf().from(divContents).save();
+    }
+  {% comment %} } {% endcomment %}
+
+  function sel_assign() {
+    var selectElement = document.getElementById('assign');
+    // Check if usernames is a string
+    if (typeof usernames === 'string') {
+        try {
+            usernames = JSON.parse(usernames.replace(/'/g, '"'));
+        } catch (error) {
+            console.error("Error parsing JSON: ", error);
+            return;
+        }
+    }
+    // Clear existing options
+    selectElement.innerHTML = '';
+    //console.log('usernames', usernames, typeof(usernames));
+    if (Array.isArray(usernames)) {
+      usernames.forEach((item) => {
+        var option = document.createElement('option');
+        option.value = item;
+        option.textContent = item;
+        selectElement.appendChild(option);
+
+      });
+    } else {
+        console.error("usernames is not an array");
+    }
+  }
+  {% comment %} document.addEventListener('DOMContentLoaded', function() {
+      var selectElement = document.getElementById('assign');
+
+      // Populate the select element with options
+      usernames.forEach(function(user) {
+          console.log("username", user);
+          var option = document.createElement('option');
+          option.value = user;
+          option.textContent = user;
+          selectElement.appendChild(option);
+      });
+  }); {% endcomment %}
+  document.getElementById("Upload").addEventListener("click", function() {
+    //console.log('Uploading.....')
+    //clearSession();
+    button_select = "Upload";
+    $.ajax({
+        url: 'unique_id',
+        type: 'GET',
+        success: function(data) {
+          document.getElementById("fileId").innerText = data;
+          let sessionData = JSON.parse(sessionStorage.getItem('page1State')) || {};
+          //console.log (sessionData)
+          // Update the session data
+          sessionData.fileId = data;
+          //console.log('sessionDatakey', sessionData.key)
+          sessionStorage.setItem('page1State', JSON.stringify(sessionData));
+          let sessionData1 = JSON.parse(sessionStorage.getItem('page1State')) || {};
+          
+          //console.log('Session data updated successfully', sessionData1);
+          
+        }
+    });
+    location.reload();
+    sel_btn();
+    sel_option();
+    //console.log(button_select);
+  });
+  document.getElementById("Create").addEventListener("click", function() {
+    button_select = "Create";
+    $.ajax({
+        url: 'unique_id',
+        type: 'GET',
+        success: function(data) {
+          document.getElementById("fileId").innerText = data;
+          let sessionData = JSON.parse(sessionStorage.getItem('page1State')) || {};
+          //console.log (sessionData)
+          // Update the session data
+          sessionData.fileId = data;
+          //console.log('sessionDatakey', sessionData.key)
+          sessionStorage.setItem('page1State', JSON.stringify(sessionData));
+          let sessionData1 = JSON.parse(sessionStorage.getItem('page1State')) || {};
+          
+          //console.log('Session data updated successfully', sessionData1);
+          
+        }
+    });// Clear all items in the session data and set them to null
+    //Object.keys(sessionData).forEach(key => {
+    //    sessionData[key] = null;
+    //});
+    
+    //console.log(sessionData); // Output: { item1: null, item2: null, item3: null }
+    location.reload();
+    //clearSession();
+    sel_btn();
+    sel_option();
+    //console.log(button_select);
+  });
+  function sel_approval () {
+    function getCurrentDate() {
+      var currentDate = new Date();
+      var year = currentDate.getFullYear();
+      var month = currentDate.getMonth() + 1; // Month is zero-based
+      var day = currentDate.getDate();
+      
+      var metadata = {
+          year: year,
+          month: month,
+          day: day
+      };
+      
+      displayMetadata(metadata);
+    }
+
+    function displayMetadata(metadata) {
+        var metadataDisplay = document.getElementById('currentTime');
+        metadataDisplay.innerText = metadata.month + '/' + metadata.day + '/' + metadata.year;
+    }
+    if (approved == true ) {
+      document.getElementById('approvedBy').innerText = username;
+      getCurrentDate();
+    }
+    else {
+      document.getElementById('approvedBy').innerText = "";
+    }
+  }
+  sel_approval();
+  let checkbox = document.getElementById('checkboxExample');
+      // Add an event listener for the 'change' event
+  checkbox.addEventListener('change', function() {
+    sel_approval();
+    location.reload();
+  });
+
+  let selectElement = document.getElementById('temple')
+  selectElement.addEventListener('change', (event) => {
+    sel_option();
+    $.ajax({
+        url: 'unique_id',
+        type: 'GET',
+        success: function(data) {
+          document.getElementById("fileId").innerText = data;
+          let sessionData = JSON.parse(sessionStorage.getItem('page1State')) || {};
+          //console.log (sessionData)
+          // Update the session data
+          sessionData.fileId = data;
+          //console.log('sessionDatakey', sessionData.key)
+          sessionStorage.setItem('page1State', JSON.stringify(sessionData));
+          let sessionData1 = JSON.parse(sessionStorage.getItem('page1State')) || {};
+          
+          //console.log('Session data updated successfully', sessionData1);
+          
+        }
+    });
+    location.reload();
+    // Retrieve the session data
+    // Save the updated session data
+
+  });
+  function sel_btn () {
+    if (button_select === "Upload") {
+      uploadElement.style.display = "block";
+      templateElement.style.display = "none";
+      document.getElementById('toggleDiv').style.display = 'none';
+
+    }
+    else if (button_select === "Create") {
+      uploadElement.style.display = "none";
+      templateElement.style.display = "block";
+    }
+    else {
+      uploadElement.style.display = "none";
+      templateElement.style.display = "none";
+    }
+  }
+  function sel_option(selectedOption){
+    //console.log('Uploading.....')
+    //clearSession();
+    document.getElementById('toggleDiv').style.display = 'block';
+    if (selectedOption === "Customer Form" && button_select == "Create") {
+      //console.log('customForm')
+      document.getElementById('customForm').style.display = 'block';
+    }
+    else if (selectedOption === "Fir Form" && button_select == "Create"){
+      document.getElementById('firForm').style.display = 'block';
+    }
+    else if (selectedOption === "MSDA Form"){
+      document.getElementById('msdaForm').style.display = 'block';
+    }
+    else {
+      document.getElementById('toggleDiv').style.display = 'none';
+    }
+  }
+
+  $('#link_modal').on('shown.bs.modal', function (e) {
+    var selectElement = document.getElementById('link_array');
+    
+    // Clear existing options
+    selectElement.innerHTML = '';
+    
+    // Populate select options based on dbArray
+    mongodbData.forEach(function(item) {
+      var option = document.createElement('option');
+      option.value = item.fileId;
+      option.textContent = item.fileId;
+      selectElement.appendChild(option);
+    });
+  });
+  
+  let files=[];
+  mongodbData.forEach(item => {
+    if(item.draft == true){
+      //console.log('userfinds', item.createdBy)
+      files.push(item);
+    }
+  })
+  function populateTable() {
+    const filesTableBody = document.getElementById('filesTableBody');
+    
+    // Clear existing table rows
+    filesTableBody.innerHTML = '';
+    
+    // Loop through 'files' array and populate the table
+    files.forEach((file, index) => {
+      const row = `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${file.fileId}</td>
+          <td>${file.fileName}</td>
+          <td>${file.status}</td>
+          <td>${file.createDate}</td>
+          <td>${file.modifiedDate}</td>
+          <td class="d-flex justify-content-between text-center">
+            <img src="/static/assets/img/edit.svg" alt="Pen Image" id="edit_${file.fileId}" style="width: 1.5em; height: 1.5em; margin-right: 1.5em;" onclick="handleEdit('${file.fileId}')">
+            <img src="/static/assets/img/del.svg" alt="Pen Image" id = "delete" name = "{{user_member.id}}" style = "width: 1.5em; height: 1.5em;" onclick="handleDelete('${file.fileId}')"> 
+          </td>
+        </tr>
+      `;
+      
+      filesTableBody.insertAdjacentHTML('beforeend', row);
+    });
+  }
+
+  
+  document.querySelectorAll('#delete').forEach(item => {
+    item.addEventListener('click', event => {
+    });
+  });
+
+  function handleDelete(id) {
+    
+    // Show confirmation modal
+    $('#confirmationModal').modal('show');
+    
+    document.getElementById('confirmDelete').addEventListener('click', () => {
+      fetch('delete_draft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ fileId: id })
+      })
+      .then(response => {
+        if (response.ok) {
+          //console.log('User deleted successfully');
+          Swal.fire({
+              icon: 'success',
+              title: 'Success!',
+              text: 'Draft successfully deleted.',
+              showConfirmButton: true, // Ensure the confirm button is shown
+              confirmButtonText: 'OK' // Customize the confirm button text
+          }).then((result) => {
+              if (result.isConfirmed) {
+                  location.reload(); // Reload the page on confirm
+              }
+          });
+        } else {
+          console.error('Failed to delete user');
+          Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: 'Can not delete this draft.'
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+      
+      $('#confirmationModal').modal('hide');
+    });
+    $('#draft_modal').modal('hide');
+  }
+
+  function handleEdit(id) {
+    let draftFile;
+    files.forEach(item => {
+      if (item.fileId === id) {
+        //console.log('userfinds', item.fileId);
+        draftFile = item;
+      }
+    });
+
+    let sessionData = JSON.parse(sessionStorage.getItem('page1State')) || {};
+    // Update the session data
+    sessionData = draftFile;
+    //console.log('sessionDatakey', sessionData);
+    sessionStorage.setItem('page1State', JSON.stringify(sessionData));
+    
+    let sessionData1 = JSON.parse(sessionStorage.getItem('page1State')) || {};
+    onLoading();
+    $('#draft_modal').modal('hide');
+    location.reload();
+  }
+
+  // Call the populateTable function when the modal is shown
+  $('#draft_modal').on('shown.bs.modal', function () {
+    //console.log("draft_modal------------");
+    populateTable();
+  });
+
+  function generatePDFs() {
+    //window.location.href = 'generate-pdf';
+    const doc = new jsPDF();
+    const contentToPrint = document.getElementById('divContent');
+
+    // Add title to the PDF content
+    const title = "Customer Form";
+    doc.text(title, 10, 10);
+
+    // Convert the content of the div to PDF
+    doc.html(contentToPrint, {
+        callback: function (pdf) {
+            // Trigger the print functionality
+            pdf.autoPrint();
+            pdf.output('dataurlnewwindow');
+        }
+    });
+  }
+
+  function generatePDF() {
+    var divId = document.getElementById('temple').value;
+    var id;
+    //console.log(divId);
+    if (divId === "Customer Form") {
+      id = "customForm";
+    }
+    else if (divId === "Fir Form") {
+      id = "firForm";
+    }
+    else if (divId === "MSDA Form") {
+      id = "msdaForm";
+    }
+    //console.log(id);
+    printCustomDiv(id);
+  }
+  // Add a click event listener to handle the selection and closing of the modal
+  document.getElementById('confirmAdd').addEventListener('click', function() {
+    var selectElement = document.getElementById('link_array');
+    var selectedOption = selectElement.options[selectElement.selectedIndex].text;
+    //console.log('selectedOption', selectedOption)
+    document.getElementById('link_name').textContent = selectedOption;
+    document.getElementById('link_name').classList.add('selected-label');
+    let link_data = mongodbData.find(item => item.fileId === selectedOption);
+    //console.log('linkdata', link_data)
+    let sessionData = JSON.parse(sessionStorage.getItem('page1State')) || {};
+    sessionData= link_data;
+    //console.log('sessionDatakey', sessionData)
+    sessionStorage.setItem('page1State', JSON.stringify(sessionData));
+    let sessionData1 = JSON.parse(sessionStorage.getItem('page1State')) || {};
+    //window.location.href="/";
+    //console.log('Session data updated successfully', sessionData1);
+    $('#link_modal').modal('hide');
+    mongodbData = JSON.parse('{{ json_data|escapejs }}');
+    //console.log('mongoData', mongodbData)
+  });
+  
+  function handlehiper() {
+    let hiper_link = document.getElementById("link_name").textContent;
+    let link_data = mongodbData.find(item => item.fileId === hiper_link);
+
+    if (link_data) {
+        //console.log('fileId', link_data.fileId);
+        let sessionData = JSON.parse(sessionStorage.getItem('page1State')) || {};
+        // Update the session data
+        let prev_link = document.getElementById('fileId').innerText;
+        sessionData= link_data;
+        sessionData.linkfile = prev_link
+        //console.log('sessionDatakey', sessionData)
+        sessionStorage.setItem('page1State', JSON.stringify(sessionData));
+        let sessionData1 = JSON.parse(sessionStorage.getItem('page1State')) || {};
+        onLoading();
+        window.location.href="/";
+        //console.log('Session data updated successfully', sessionData1);
+    }
+  }
+  
+  $(document).ready(function() {
+    $('#fileInput').change(function() {
+      var file = $(this)[0].files[0];
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+        uploadFile = e.target.result;
+        uploadFileType = file.type.split('/')[0];
+        
+        displayFilePreview(uploadFile, uploadFileType);
+      };
+
+      reader.readAsDataURL(file);
+  });
+});
+
+function displayFilePreview(fileContent, fileName) {
+  const filePreview = document.getElementById('preview-container');
+
+  // Extract the file extension from the fileName
+  const fileExtension = fileName.split('.').pop().toLowerCase();
+  //console.log('fileExtension', fileExtension);
+  // Check the file extension to determine the file type
+  if (fileExtension === "application") {
+      filePreview.innerHTML = `<embed src="${fileContent}" type="application/pdf" width="100%" height="200px" />`;
+  } else if (['jpg', 'jpeg', 'png'].includes(fileExtension)) {
+      filePreview.innerHTML = `<img src="${fileContent}" style="max-width: 100%; max-height: 200px;" />`;
+  } else if (['doc', 'docx'].includes(fileExtension)) {
+      filePreview.innerHTML = `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${fileContent}" width="100%" height="600px" frameborder="0"></iframe>`;
+  } else {
+      filePreview.innerHTML = `<p>File type not supported for preview.</p>`;
+  }
+}
+
+
+  // Display file preview on page load
+  window.onload = function() {
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('preview-container');
+    
+    const file_info = JSON.parse("{{ request.session.file_info|escapejs }}");
+    if (file_info) {
+        filePreview.innerHTML = `
+            <p>File Name: ${file_info.name}</p>
+            <p>File Type: ${file_info.type}</p>
+            <p>File Content: ${file_info.content}</p>
+        `;
+        
+        // Show file input
+        fileInput.style.display = 'block';
+    }
+    
+    // Set file input value if file info is available
+    if (file_info && file_info.name) {
+        fileInput.value = file_info.name;
+    }
+  };
+
+  
+  function showModal() {
+      document.getElementById('urlModal').style.display = 'block';
+  }
+
+  function cancelModal() {
+      document.getElementById('urlModal').style.display = 'none';
+  }
+
+  function confirmModal() {
+      var modalUrlInput = document.getElementById('modalUrlInput');
+      var urlInput = document.getElementById('urlInput');
+      urlInput.value = modalUrlInput.value;
+      cancelModal();
+  }
+    function submitForm(event) {
+      event.preventDefault();
+      var attach = document.getElementById('attach').value;
+      var linkfile = document.getElementById('urlInput').value;
+      var approved = document.getElementById('approved').value;
+      var customerName = document.getElementById('customerName').value;
+      var birth = document.getElementById('birth').value;
+      var panNumber = document.getElementById('panNumber').value;
+      var adharNumber = document.getElementById('adharNumber').value;
+      var shortDescription = document.getElementById('shortDescription').value;
+      var detailsitem = document.getElementById('detailsitem').value;
+      var url = "{% url 'download_pdf' %}?attach=" + attach + "&linkfile=" + linkfile + "&approved=" + approved + "&birth=" + birth + "&panNumber=" + panNumber + "&adharNumber=" + adharNumber + "&shortDescription=" + shortDescription + "&detailsitem=" + detailsitem ;
+      window.location.href = url;
+      //console.log('shortDescription', shortDescription, 'detailsitem', detailsitem);
+    }
+    let cnt =0;
+    function handleSelectChange() {
+      var selectedOption = document.getElementById("temple").value;
+      if (selectedOption === "Customer Form") {
+        //console.log('selectedOption', selectedOption)
+        cnt = cnt + 1;
+        let cntt= cnt % 2;
+        if (cntt == 0){
+          document.getElementById('createDate').innerText = '';
+          document.getElementById('createdBy').innerText = '';
+          document.getElementById('modifiedDate').innerText = '';
+          document.getElementById('modifiedBy').innerText = '';
+          document.getElementById("fileId").innerText = '';
+          
+        }
+        else {
+          
+          function getCurrentDate() {
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = currentDate.getMonth() + 1; // Month is zero-based
+            var day = currentDate.getDate();
+            
+            var metadata = {
+                year: year,
+                month: month,
+                day: day
+            };
+            
+            displayMetadata(metadata);
+          }
+          function displayMetadata(metadata) {
+            var metadataDisplay = document.getElementById('createDate');
+            var metadataModify = document.getElementById('modifiedDate');
+            metadataDisplay.innerHTML = metadata.month + '/' + metadata.day + '/' + metadata.year;
+            metadataModify.innerHTML = metadata.month + '/' + metadata.day + '/' + metadata.year;
+            document.getElementById('createdBy').innerText = username;
+            document.getElementById('modifiedBy').innerText = username;
+          }
+  
+          // Call the function to get the current date
+          getCurrentDate();
+        }
+        var textElement = document.getElementById("toggleDiv");
+        textElement.style.display = "block";
+      }
+//      else if (selectedOption === "Fir Form") {
+//        window.location.href = 'firform';
+//      }
+//      else if (selectedOption === "MSDA Form") {
+//        window.location.href = 'mahadiscomreg'
+//      }
+        // You can perform additional actions based on the selected option here
+    }
+    function sendCustomData() {
+      saveState();
+      function getCurrentDate() {
+        var currentDate = new Date();
+        var year = currentDate.getFullYear();
+        var month = currentDate.getMonth() + 1; // Month is zero-based
+        var day = currentDate.getDate();
+        
+        var metadata = {
+            year: year,
+            month: month,
+            day: day
+        };
+        
+        displayMetadata(metadata);
+      }
+
+      function displayMetadata(metadata) {
+          var metadataDisplay = metadata.month + '/' + metadata.day + '/' + metadata.year;
+          stateData.modifiedDate = metadataDisplay;
+      }
+      //const data = sessionStorage.getItem('page1State')
+      let data = JSON.parse(sessionStorage.getItem('page1State')) || {};
+      // Update the session data
+      data.draft = false;
+      
+      
+      //console.log('datakey', data)
+      sessionStorage.setItem('page1State', JSON.stringify(data));
+      let data1 = JSON.parse(sessionStorage.getItem('page1State')) || {};
+      //console.log('Session data updated successfully', data1);
+      let alertText = '';
+      if (data1.fileName == ''){
+        alertText = "File Name"
+      }
+      if (data1.labels == ''){
+        alertText = 'Label'
+      }
+      if (data1.fileName == '' || data1.labels == '') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: alertText + " is required!"
+      });
+      }
+      else {
+        fetch('send_custom_data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.text())
+        .then(data => {
+          //console.log('success');
+          Swal.fire({
+              icon: 'success',
+              title: 'Success!',
+              text: 'Data has been sent successfully.',
+              showConfirmButton: true, // Ensure the confirm button is shown
+              confirmButtonText: 'OK' // Customize the confirm button text
+          }).then((result) => {
+              if (result.isConfirmed) {
+                  clearSession();
+                  location.reload(); // Reload the page on confirm
+              }
+          });
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: 'An error occurred while sending data.'
+          });
+        });
+      }
+    }
+    function sendDraftData() {
+      saveState();
+      //const data = sessionStorage.getItem('page1State')
+      let data = JSON.parse(sessionStorage.getItem('page1State')) || {};
+      // Update the session data
+      data.draft = true;
+      //console.log('datakey', data)
+      sessionStorage.setItem('page1State', JSON.stringify(data));
+      let data1 = JSON.parse(sessionStorage.getItem('page1State')) || {};
+      //console.log('Session data updated successfully', data1);
+      let alertText = '';
+      if (data1.fileName == ''){
+        alertText = "File Name"
+      }
+      if (data1.labels == ''){
+        alertText = 'Label'
+      }
+      if (data1.fileName == '' || data1.labels == '') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: alertText + " is required!"
+      });
+      }
+      else {
+        fetch('send_custom_data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.text())
+        .then(data => {
+          //console.log('success');
+          Swal.fire({
+              icon: 'success',
+              title: 'Success!',
+              text: 'Data saved as draft successfully.',
+              showConfirmButton: true, // Ensure the confirm button is shown
+              confirmButtonText: 'OK' // Customize the confirm button text
+          }).then((result) => {
+              if (result.isConfirmed) {
+                  location.reload(); // Reload the page on confirm
+              }
+          });
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: 'An error occurred while saving data.'
+          });
+        });
+      }
+    }
+    function getCurrentDate() {
+        var currentDate = new Date();
+        var year = currentDate.getFullYear();
+        var month = currentDate.getMonth() + 1; // Month is zero-based
+        var day = currentDate.getDate();
+        
+        var metadata = {
+            year: year,
+            month: month,
+            day: day
+        };
+        
+        displayMetadata(metadata);
+    }
+
+    function displayMetadata(metadata) {
+        var metadataDisplay = document.getElementById('currentTime');
+        metadataDisplay.innerText = metadata.month + '/' + metadata.day + '/' + metadata.year;
+    }
+  
+
+    // Call the function to get the current date
+    getCurrentDate();
+    {% comment %} document.getElementById("togglePan").addEventListener("click", function() {
+        var textElement = document.getElementById("toggleDiv");
+        if (textElement.style.display === "none") {
+            textElement.style.display = "block";
+        } else {
+            textElement.style.display = "none";
+        }
+    }); {% endcomment %}
+  </script>
+  <script>
+  </script>
+  <script>
+  </script>
+  <script>
+    $(document).ready(function() {
+        $("#toggleLabel").click(function() {
+            $("#properties").toggle();
+            $("#icon").toggleClass("fa-chevron-down fa-chevron-left");
+        });
+    });
+  </script>
+  <script>
+    function gotoFir() {  
+      function getCurrentDate() {
+        var currentDate = new Date();
+        var year = currentDate.getFullYear();
+        var month = currentDate.getMonth() + 1; // Month is zero-based
+        var day = currentDate.getDate();
+        
+        var metadata = {
+            year: year,
+            month: month,
+            day: day
+        };
+        
+          displayMetadata(metadata);
+      }
+
+      function displayMetadata(metadata) {
+          var metadataDisplay = document.getElementById('createDate');
+          metadataDisplay.innerHTML = metadata.month + '/' + metadata.day + '/' + metadata.year;
+          document.getElementById('createdBy').innerText = 'root';
+      }
+      getCurrentDate();
+    }
+  </script>
+  <script>
+    $(document).ready(function() {
+      $('#fileInput').on('change', function() {
+          var file = this.files[0];
+          var formData = new FormData();
+          formData.append('file', file);
+  
+          $.ajax({
+              url: 'extract_metadata',
+              type: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': '{{ csrf_token }}'
+              },
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function(data) {
+                  $('#createdDate').text(data.created_date);
+                  $('#createBy').text(data.author);
+              },
+              error: function() {
+                  alert('Error occurred while processing the file.');
+              }
+          });
+      });
+  });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+  <script>
+    function extractMetadatas() {
+        var fileInput = document.getElementById('fileInput');
+        var file = fileInput.files[0];
+        //console.log('file', file)
+        if (file) {
+          EXIF.getData(file, function() {
+              var metadata = EXIF.getAllTags(this);
+              displayMetadata(metadata);
+              //console.log('metadata', metadata);
+          });
+        }
+    }
+  </script>
+  <script>
+    function extractMetadata() {
+        var fileInput = document.getElementById('fileInput');
+        var file = fileInput.files[0];
+        var fileType = file.type;
+        //console.log('type================>',fileType)
+
+        if (fileType === 'application/pdf') {
+          //console.log('pdf')
+            // Extract metadata from PDF file
+            pdfjsLib.getDocument(file).promise.then(function(pdf) {
+                pdf.getMetadata().then(function(metadata) {
+                  
+                    //console.log('pdf--------------->', metadata)
+                    displayMetadata(metadata);
+                });
+            });
+        } else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || fileType === 'application/msword') {
+            //console.log('doc');
+            // Extract metadata from DOC file (assuming you have the necessary library)
+            mammoth.extractRawText({ arrayBuffer: file }).then(function(result) {
+                var metadata = {
+                    createdDate: result.value.createdDate,
+                    author: result.value.author
+                };
+                //console.log('doc--------------->', metadata)
+                displayMetadata(metadata);
+            });
+        } else if (fileType === 'image/jpeg' || fileType === 'image/png') {
+            // Extract metadata from image file
+            //console.log('img')
+            EXIF.getData(file, function() {
+                var metadata = {
+                    createdDate: this.exifdata.DateTimeOriginal,
+                    author: this.exifdata.Artist
+                };
+                //console.log('img--------------->', metadata)
+                displayMetadata(metadata);
+            });
+        } else {
+          
+            function getCurrentDate() {
+              var currentDate = new Date();
+              var year = currentDate.getFullYear();
+              var month = currentDate.getMonth() + 1; // Month is zero-based
+              var day = currentDate.getDate();
+              
+              var metadata = {
+                  year: year,
+                  month: month,
+                  day: day
+              };
+              
+              displayMetadata(metadata);
+          }
+
+          function displayMetadata(metadata) {
+              var metadataDisplay = document.getElementById('createDate');
+              metadataDisplay.innerHTML = metadata.month + '/' + metadata.day + '/' + metadata.year;
+              document.getElementById('createdBy').innerText = 'root';
+          }
+        }
+    }
+
+    function displayMetadata(metadata) {
+      //console.log(metadata)
+      document.getElementById('createDate').innerText = metadata.createdDate;
+      document.getElementById('createdBy').innerText = metadata.author;
+    }
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+/>
+
+
+
+
+<script>
+  if ("webkitSpeechRecognition" in window) {
+    // Initialize webkitSpeechRecognition
+    let speechRecognition = new webkitSpeechRecognition();
+    var recog = false;
+    var opId = "";
+    var intId = "";
+    // String for the Final Transcript
+    let final_transcript = "";
+
+    // Set the properties for the Speech Recognition object
+    speechRecognition.continuous = true;
+    speechRecognition.interimResults = true;
+    speechRecognition.maxAlternatives = 0;
+    // speechRecognition.lang = document.querySelector("#select_dialect").value;
+    speechRecognition.lang = "en";
+    // Callback Function for the onStart Event
+    speechRecognition.onstart = () => {
+      // Show the Status Element
+      document.querySelector("#status").style.display = "Listening";
+    };
+    speechRecognition.onerror = () => {
+      // Hide the Status Element
+      document.querySelector("#status").style.display = "Error";
+    };
+    speechRecognition.onend = () => {
+      // Hide the Status Element
+      document.querySelector("#status").style.display = "End";
+    };
+
+    speechRecognition.onresult = (event) => {
+      // Create the interim transcript string locally because we don't want it to persist like final transcript
+      let interim_transcript = "";
+
+      // Loop through the results from the speech recognition object.
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        // If the result item is Final, add it to Final Transcript, Else add it to Interim transcript
+        if (event.results[i].isFinal) {
+          final_transcript += event.results[i][0].transcript;
+        } else {
+          //console.log("interim");
+          interim_transcript += event.results[i][0].transcript;
+        }
+      }
+
+      // Set the Final transcript and Interim transcript.
+      document.querySelector(opId).value = final_transcript;
+      // document.querySelector(opId).value = final_transcript;
+      document.querySelector(intId).innerHTML = interim_transcript;
+      //console.log(interim_transcript);
+    };
+    idArr = [
+      "#dist",
+      "#ps",
+      "#year",
+      "#firNo",
+      "#firDate",
+      "#act1",
+      "#act2",
+      "#act3",
+      "#act4",
+      "#sections1",
+      "#sections2",
+      "#sections3",
+      "#address",
+      "#day",
+      "#dateFrom",
+      "#dateTo",
+      "#timePeriod",
+      "#timeFrom",
+      "#timeTo",
+      "#recvDate",
+      "#recvTime",
+      "#refNo",
+      "#refTime",
+      "#infoType",
+      "#writtenOral",
+      "#direction",
+      "#beatNo",
+    ];
+    for (let j = 0; j < idArr.length; j++) {
+      // Set the onClick property of the start button
+      document.querySelector(`#${idArr[j]}`).ondblclick = () => {
+        // Start the Speech Recognition
+        // speechRecognition.lang = "en";
+      speechRecognition.lang = document.getElementById('lang').value;
+
+        if (!recog) {
+          opId = idArr[j];
+          intId = "#interim" + (j + 1);
+          final_transcript = "";
+          speechRecognition.start();
+          recog = true;
+        } else {
+          opId = idArr[j];
+          speechRecognition.stop();
+          recog = false;
+        }
+      };
+    }
+  } else {
+    //console.log("Speech Recognition Not Available");
+  }
+  // Set the onClick property of the stop button
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.js" 
+  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
+  crossorigin="anonymous"
+>
+</script>
+    {%endblock %}
+        
+
+

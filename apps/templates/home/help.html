@@ -1,0 +1,194 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} UI Notifications {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+{% comment %} <h2 class="mt-4 pt-4">Transcript</h2> {% endcomment %}
+<div class = "mx-auto  col-md-12 row mt-5 round">
+    <div class ="col-md-12">
+        <label class="form-label" for="name">Subject</label>
+        <input
+            class="form-control"
+            id="subject"
+            type="text"
+            name="subject"
+        />
+    </div>
+    <div class ="col-md-12">
+        <label class="form-label" for="description">Description</label>
+        <textarea
+            cols="50" 
+            rows="10"
+            class ="form-control"
+            id="description"
+            name="description"
+        ></textarea>
+    </div>
+    <div class="form-group">
+        <button id = "download"  class="btn btn-primary  mt-4 align-items-center" id="help"
+            onclick="sendHelpData()"
+        >
+            Submit
+    </button>
+</div>
+</div>
+
+<script>
+// Function to delete a row
+  function deleteRow(event) {
+    let row = event.target.closest('tr');
+    row.remove();
+  }
+
+  var mongoData = JSON.parse('{{ json_data|escapejs }}');
+  var kmsdata = [];
+  mongoData.forEach(item => {
+    if(item.draft == false){
+      console.log('userfinds', item.createdBy)
+      kmsdata.push(item);
+    }
+  })
+  console.log('kmsdata', kmsdata)
+  
+const defaultFromDate = new Date('1000-01-01');
+const defaultToDate = new Date('3000-12-31');
+
+const fromInput = document.getElementById('from_date');
+const toInput = document.getElementById('to_date');
+
+fromInput.addEventListener('input', filterData);
+toInput.addEventListener('input', filterData);
+
+document.addEventListener('DOMContentLoaded', function() {
+  filterData();
+});
+
+async function filterData() {
+  const fromDateValue = fromInput.value;
+  const toDateValue = toInput.value;
+
+  const fromDate = fromDateValue ? new Date(fromDateValue) : defaultFromDate;
+  fromDate.setHours(0, 0, 0, 0); // Set time to midnight
+  const toDate = toDateValue ? new Date(toDateValue) : defaultToDate;
+  toDate.setHours(23, 59, 59, 999); // Set time to end of day
+
+  kmsdataDate = kmsdata.filter(item => {
+    const itemDate = new Date(item.modifiedDate);
+    itemDate.setHours(1, 0, 0, 0);
+    const fromDateObj = new Date(fromDate);
+    const toDateObj = new Date(toDate);
+    return itemDate >= fromDateObj && itemDate <= toDateObj;
+  });
+
+  applyFilters();
+}
+
+function applyFilters() {
+  const searchTermStatus = document.getElementById('search_status').value.toLowerCase();
+  const searchTermId = document.getElementById('search_id').value.toLowerCase();
+
+  const kmsdatafil = kmsdataDate.filter(item => {
+    return item.createdBy.toLowerCase().includes(searchTermStatus) && item.fileName.toLowerCase().includes(searchTermId);
+  });
+
+  populateTable(kmsdatafil);
+}
+
+document.getElementById('search_status').addEventListener('input', applyFilters);
+document.getElementById('search_id').addEventListener('input', applyFilters);
+  // Define the kmsdata variable with the provided data
+  {% comment %} let kmsdata = [{file_id: 0, name: 'FGA11', file_status: "Work in Progress", updatingDate: "03/20/2024"}]; {% endcomment %}
+  console.log('kmsdata---------->', kmsdata[0].status)
+  // You can now use the kmsdata variable in this script block for further processing or manipulation
+  function editRow(event) {
+    let editIcon = event.target;
+    let itemData = JSON.parse(editIcon.getAttribute('data-item'));
+    let sessionData = JSON.parse(sessionStorage.getItem('page1State')) || {};
+    // Update the session data
+    sessionData= itemData;
+    console.log('sessionDatakey', sessionData)
+    sessionStorage.setItem('page1State', JSON.stringify(sessionData));
+    let sessionData1 = JSON.parse(sessionStorage.getItem('page1State')) || {};
+    window.location.href="/";
+    console.log('Session data updated successfully', sessionData1);
+  }
+  // Function to populate the table with data
+  function populateTable(data) {
+    let tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = '';
+    data.forEach(item => {
+      let row = tableBody.insertRow();
+      // Create icons for edit and delete
+      let sortIcon = document.createElement('img');
+      sortIcon.classList.add('text-center'); 
+      sortIcon.src = '/static/assets/img/new_file.svg';
+      sortIcon.style.width = '24px'; // Set the width of the image
+      sortIcon.style.height = '24px'; // Set the height of the image
+  
+      let cell0 = row.insertCell(0);
+      cell0.appendChild(sortIcon);
+      cell0.classList.add('text-center')
+  
+      // Set the content of other cells
+      let cell1 = row.insertCell(1);
+      cell1.textContent = item.fileId;
+      cell1.classList.add('text-center'); // Add class to cell 1
+  
+      let cell2 = row.insertCell(2);
+      cell2.textContent = item.createdBy;
+      cell2.classList.add('text-center'); // Add class to cell 2
+  
+      let cell3 = row.insertCell(3);
+      cell3.textContent = item.fileName;
+      cell3.classList.add('text-center'); // Add class to cell 3
+  
+      let cell4 = row.insertCell(4);
+      cell4.textContent = item.status;
+      cell4.classList.add('text-center'); // Add class to cell 4
+      
+      let cell5 = row.insertCell(5);
+      cell5.textContent = item.modifiedDate;
+      cell5.classList.add('text-center'); // Add class to cell 4
+     // row.insertCell(1).textContent = item.fileId;
+     // row.insertCell(2).textContent = item.file_name;
+     // row.insertCell(3).textContent = item.status;
+     // row.insertCell(4).textContent = item.modifiedDate;
+      // Create icons for edit and delete actions
+      let editIcon = document.createElement('img');
+      editIcon.src = '/static/assets/img/edit.svg';
+      editIcon.style.width = '24px'; // Set the width of the image
+      editIcon.style.height = '24px';
+      editIcon.setAttribute('data-item', JSON.stringify(item));
+      editIcon.addEventListener('click', function() {
+          editRow(event);
+      });
+  
+      let deleteIcon = document.createElement('img');
+      deleteIcon.src = '/static/assets/img/del.svg';
+      deleteIcon.style.width = '24px'; // Set the width of the image
+      deleteIcon.style.height = '24px';
+      deleteIcon.addEventListener('click', function(event) {
+          deleteRow(event);
+      });
+  
+      // Create a div element to hold the icons with the specified styles
+      let iconContainer = document.createElement('div');
+      iconContainer.className = 'd-flex flex-row align-items-center justify-content-around text-center';
+      iconContainer.appendChild(editIcon);
+      iconContainer.appendChild(deleteIcon);
+  
+      // Add the icon container to the fifth cell of the row (index 5)
+      let cell6 = row.insertCell(6);
+      cell6.appendChild(iconContainer);
+    });
+  }
+
+  // Call the populateTable function with the provided data
+  populateTable(kmsdata);
+</script>
+    
+{% endblock %}
